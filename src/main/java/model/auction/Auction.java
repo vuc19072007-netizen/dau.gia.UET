@@ -400,6 +400,21 @@ public class Auction {
                 status = AuctionStatus.FINISHED;
                 winner = highestBid == null ? null : highestBid.getBidder();
                 if (winner == null) item.setStatus(ItemStatus.UNSOLD);
+            /*
+             * Phiên đã FINISHED, có người thắng nhưng tài khoản người thắng bị khóa.
+             * Người bị khóa không đăng nhập được nên không thể thanh toán;
+             * payAuction() cũng từ chối tài khoản bị khóa. Nếu không xử lý, phiên
+             * đứng mãi ở FINISHED và tiền của người thắng bị giữ mãi.
+             * Cách xử lý: hủy phiên và hoàn khoản giữ, giống khi người bán hủy.
+             * Sản phẩm về CANCELED nên người bán có thể đăng lại phiên mới.
+             * Nhánh này nằm trong vùng bidLock nên không chạy xen với payAuction().
+             */
+            } else if (status == AuctionStatus.FINISHED && highestBid != null
+                    && !highestBid.getBidder().isActive()) {
+                // Chỉ trả đúng khoản giữ của phiên này (fundsKey), không đụng phiên khác.
+                highestBid.getBidder().releaseAuctionFunds(fundsKey);
+                item.setStatus(ItemStatus.CANCELED);
+                status = AuctionStatus.CANCELED;
             } else {
                 return;
             }

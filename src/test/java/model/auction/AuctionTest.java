@@ -157,6 +157,74 @@ class AuctionTest {
         assertEquals(AuctionStatus.RUNNING, auction.getStatus());
     }
 
+    // Ca bàn giao cho Server 2: hai người đặt CÙNG một mức giá hợp lệ cùng lúc.
+    // Chỉ một lượt được nhận; tiền giữ phải khớp với đúng người dẫn đầu.
+    // @RepeatedTest chạy lại 20 lần vì lỗi đa luồng không phải lần nào cũng lộ ra.
+    @RepeatedTest(20) void twoBiddersSamePriceOnlyOneAccepted() throws Exception {
+        running();
+        // Hai luồng, mỗi luồng đóng vai một người đặt giá.
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        // Cổng xuất phát: cả hai luồng chờ ở await(), countDown() mở cổng cùng lúc
+        // để hai lượt đặt giá chạm nhau sát nhất có thể.
+        CountDownLatch startGate = new CountDownLatch(1);
+        // Đếm số lượt thành công và số lượt bị từ chối (AtomicInteger an toàn đa luồng).
+        AtomicInteger accepted = new AtomicInteger();
+        AtomicInteger rejected = new AtomicInteger();
+        try {
+            List<Future<?>> results = new ArrayList<>();
+            for (Bidder bidder : List.of(a, b)) {
+                results.add(pool.submit(() -> {
+                    startGate.await();
+                    try {
+                        // 110 = giá khởi điểm 100 + bước giá 10: hợp lệ với cả hai.
+                        auction.placeBid(bidder, money(110));
+                        accepted.incrementAndGet();
+                    } catch (IllegalArgumentException tooLow) {
+                        // Người đến sau: giá hiện tại đã là 110 nên cần ít nhất 120.
+                        rejected.incrementAndGet();
+                    }
+                    return null;
+                }));
+            }
+            startGate.countDown();
+            // get() chờ luồng xong; nếu luồng ném lỗi lạ thì test thất bại tại đây.
+            for (Future<?> result : results) result.get(5, TimeUnit.SECONDS);
+        } finally { pool.shutdownNow(); }
+
+        assertEquals(1, accepted.get());
+        assertEquals(1, rejected.get());
+        // Giá và lịch sử chỉ ghi nhận đúng một lượt.
+        eq(auction.getCurrentPrice(), 110);
+        assertEquals(1, auction.getBidHistory().size());
+        // Người dẫn đầu bị giữ đúng 110, người còn lại không bị giữ đồng nào.
+        Bidder leader = auction.getHighestBid().getBidder();
+        Bidder other = leader == a ? b : a;
+        eq(leader.getLockedBalance(), 110);
+        eq(other.getLockedBalance(), 0);
+    }
+
+    // Người thắng bị khóa tài khoản sau khi phiên kết thúc: đồng hồ tự hủy phiên
+    // và hoàn tiền, không để phiên kẹt ở FINISHED.
+    @Test void blockedWinnerAuctionIsCanceledAndRefunded() throws InterruptedException {
+        runningWithNearEnd(); auction.placeBid(a, money(110));
+        // Hết giờ, đồng hồ chuyển phiên sang FINISHED, tiền của a vẫn đang giữ.
+        awaitEnd(); auction.updateTime();
+        assertEquals(AuctionStatus.FINISHED, auction.getStatus()); eq(a.getLockedBalance(), 110);
+        // Admin khóa người thắng; lần đồng hồ chạy tiếp theo phải hủy phiên.
+        a.setActive(false); auction.updateTime();
+        assertEquals(AuctionStatus.CANCELED, auction.getStatus());
+        assertEquals(ItemStatus.CANCELED, auction.getItem().getStatus());
+        // Hoàn khoản giữ nhưng không trừ tiền: số dư vẫn đủ 1000.
+        eq(a.getLockedBalance(), 0); eq(a.getBalance(), 1000);
+    }
+
+    // Người thắng còn hoạt động thì đồng hồ không được tự hủy phiên.
+    @Test void activeWinnerAuctionStaysFinished() throws InterruptedException {
+        runningWithNearEnd(); auction.placeBid(a, money(110));
+        awaitEnd(); auction.updateTime(); auction.updateTime();
+        assertEquals(AuctionStatus.FINISHED, auction.getStatus()); eq(a.getLockedBalance(), 110);
+    }
+
     @Test void timeUpdateOpensAndClosesAuction() throws InterruptedException {
         end = LocalDateTime.now().plusSeconds(1);
         Auction timed = new Auction(new Art("Timed", money(100)), seller, money(10), start, end);

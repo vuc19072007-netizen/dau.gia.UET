@@ -59,16 +59,23 @@ public abstract class User extends Entity{
         }
         return role;
     }
-    public String getName(){
+    /*
+     * name, password, address có thể bị đổi (setter) trong lúc luồng khác đang đọc
+     * (getter), ví dụ một client đổi mật khẩu khi client khác đang đăng nhập.
+     * synchronized trên cả getter và setter để luồng đọc luôn thấy giá trị mới nhất
+     * và không đọc giữa chừng lúc đang ghi. Cùng cách với isActive()/setActive().
+     * phoneNumber và role không có setter (không đổi sau khi tạo) nên không cần.
+     */
+    public synchronized String getName(){
         return name;
     }
     public String getPhoneNumber(){
         return phoneNumber;
     }
-    public String getPassword(){
+    public synchronized String getPassword(){
         return password;
     }
-    public String getAddress(){
+    public synchronized String getAddress(){
         return address;
     }
     public String getRole(){
@@ -77,7 +84,7 @@ public abstract class User extends Entity{
     public synchronized boolean isActive(){
         return isActive;
     }
-    public void setPassword(String newPassword){
+    public synchronized void setPassword(String newPassword){
         validatePassword(newPassword);
         this.password=newPassword;
         markUpdated();
@@ -86,12 +93,12 @@ public abstract class User extends Entity{
         this.isActive=active;
         markUpdated();
     }
-    public void setName(String name) {
+    public synchronized void setName(String name) {
         this.name = validateName(name);
         markUpdated();
     }    
 
-    public void setAddress(String address) {
+    public synchronized void setAddress(String address) {
         this.address = address;
         markUpdated();
     }
