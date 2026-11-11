@@ -116,6 +116,47 @@ class AuctionTest {
         assertEquals(AuctionStatus.PAID, auction.getStatus()); assertEquals(ItemStatus.SOLD, auction.getItem().getStatus());
         assertThrows(IllegalStateException.class, () -> auction.payAuction(a));
     }
+    // Ba test dưới đây kiểm tra việc so sánh người dùng theo mã (getId())
+    // trong payAuction() và cancelAuction().
+
+    // Bản sao cùng mã với người thắng phải thanh toán được.
+    @Test void winnerCopyWithSameIdCanPay() throws InterruptedException {
+        // Phiên sắp hết giờ, a đặt 110 rồi chờ phiên kết thúc: a là người thắng.
+        runningWithNearEnd(); auction.placeBid(a, money(110)); finish();
+        // Tạo đối tượng MỚI nhưng truyền lại đúng mã của a (constructor có id).
+        // Giống tình huống server nhận lại người dùng qua mạng hoặc đọc từ file.
+        // Bản sao này chưa nạp tiền nên số dư của nó bằng 0.
+        Bidder copy = new Bidder(a.getId(), "A", "0987654321", "password1", "HN");
+        // Không ném lỗi nghĩa là phiên đã nhận ra copy chính là người thắng.
+        auction.payAuction(copy);
+        // Tiền phải trừ trên a (đối tượng phiên đang giữ): 1000 - 110 = 890.
+        // Bản sao không bị đụng tới, người bán nhận đủ 110.
+        eq(a.getBalance(), 890); eq(copy.getBalance(), 0); eq(seller.getBalance(), 110);
+        assertEquals(AuctionStatus.PAID, auction.getStatus());
+    }
+
+    // Bản sao cùng mã với người bán phải hủy được phiên.
+    @Test void sellerCopyWithSameIdCanCancel() {
+        // a đặt 110 nên đang bị giữ 110 cho phiên này.
+        running(); auction.placeBid(a, money(110));
+        // Đối tượng mới mang đúng mã của người bán sở hữu phiên.
+        Seller copy = new Seller(seller.getId(), "Seller", "0912345678", "password1", "HN");
+        auction.cancelAuction(copy);
+        // Phiên chuyển sang CANCELED và tiền đang giữ của a được hoàn lại.
+        assertEquals(AuctionStatus.CANCELED, auction.getStatus()); eq(a.getLockedBalance(), 0);
+    }
+
+    // Người bán khác (mã khác) không được hủy phiên của người khác.
+    @Test void otherSellerCannotCancel() {
+        running();
+        // Không truyền id nên Entity tự sinh mã mới, khác mã của seller.
+        Seller other = new Seller("Other", "0911111111", "password1", "HN");
+        // assertThrows: test chỉ đạt khi lời gọi ném đúng loại ngoại lệ này.
+        assertThrows(IllegalArgumentException.class, () -> auction.cancelAuction(other));
+        // Bị từ chối thì trạng thái phiên phải giữ nguyên.
+        assertEquals(AuctionStatus.RUNNING, auction.getStatus());
+    }
+
     @Test void timeUpdateOpensAndClosesAuction() throws InterruptedException {
         end = LocalDateTime.now().plusSeconds(1);
         Auction timed = new Auction(new Art("Timed", money(100)), seller, money(10), start, end);

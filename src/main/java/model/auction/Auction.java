@@ -291,13 +291,31 @@ public class Auction {
 
             Bidder winner = highestBid.getBidder();
 
-            // Dùng đúng đối tượng người dùng do manager quản lý.
-            if (payer == null || payer != winner) {
+            /*
+             * Kiểm tra người thanh toán có đúng là người thắng không.
+             *
+             * Trước đây dùng (payer != winner): toán tử != trên đối tượng chỉ
+             * so ĐỊA CHỈ trong bộ nhớ, tức hai biến có trỏ tới cùng một đối
+             * tượng hay không. Khi dữ liệu được đọc lại từ file hoặc nhận qua
+             * mạng, Java tạo ra đối tượng MỚI có nội dung giống hệt nhưng địa
+             * chỉ khác, nên chính người thắng cũng bị từ chối.
+             *
+             * Bây giờ so theo mã người dùng (getId()): mỗi tài khoản có một mã
+             * duy nhất do Entity cấp, nên cùng mã nghĩa là cùng một người.
+             * Dùng equals() vì mã là String; == trên String cũng chỉ so địa chỉ.
+             * Gọi winner.getId().equals(...) (winner chắc chắn khác null) để
+             * không bị NullPointerException.
+             */
+            if (payer == null
+                    || !winner.getId().equals(payer.getId())) {
                 throw new IllegalArgumentException(
                         "Chỉ người thắng được thanh toán");
             }
 
-            if (!payer.isActive()) {
+            // Từ đây trở xuống chỉ dùng winner, không dùng payer: winner là đối
+            // tượng phiên đang giữ nên trạng thái khóa và số dư của nó mới là
+            // dữ liệu thật. payer có thể là bản sao đã cũ.
+            if (!winner.isActive()) {
                 throw new IllegalStateException(
                         "Tài khoản đang bị khóa");
             }
@@ -340,8 +358,20 @@ public class Auction {
     // Overload có kiểm tra quyền cho giao diện: seller sở hữu phiên hoặc admin.
     // Hàm hủy nội bộ chỉ được gọi sau khi kiểm tra quyền của người yêu cầu.
     public void cancelAuction(User actor) {
+        /*
+         * Ba điều kiện bị từ chối:
+         * 1. actor == null: không biết ai yêu cầu.
+         * 2. Tài khoản của actor đang bị khóa.
+         * 3. actor không phải Admin VÀ cũng không phải người bán của phiên.
+         *
+         * Điều kiện 3 so theo mã người dùng (getId()) thay vì (actor != seller).
+         * Lý do giống payAuction(): != chỉ so địa chỉ đối tượng, nên bản sao
+         * của đúng người bán (đọc từ file/nhận qua mạng) sẽ bị từ chối sai.
+         * instanceof Admin kiểm tra kiểu thật của đối tượng lúc chạy.
+         */
         if (actor == null || !actor.isActive()
-                || (!(actor instanceof Admin) && actor != seller)) {
+                || (!(actor instanceof Admin)
+                    && !seller.getId().equals(actor.getId()))) {
             throw new IllegalArgumentException("Chỉ người bán sở hữu phiên hoặc admin được hủy");
         }
         cancelAuction();
