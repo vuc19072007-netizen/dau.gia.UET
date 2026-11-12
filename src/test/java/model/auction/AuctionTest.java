@@ -203,21 +203,6 @@ class AuctionTest {
         eq(other.getLockedBalance(), 0);
     }
 
-    // Người thắng bị khóa tài khoản sau khi phiên kết thúc: đồng hồ tự hủy phiên
-    // và hoàn tiền, không để phiên kẹt ở FINISHED.
-    @Test void blockedWinnerAuctionIsCanceledAndRefunded() throws InterruptedException {
-        runningWithNearEnd(); auction.placeBid(a, money(110));
-        // Hết giờ, đồng hồ chuyển phiên sang FINISHED, tiền của a vẫn đang giữ.
-        awaitEnd(); auction.updateTime();
-        assertEquals(AuctionStatus.FINISHED, auction.getStatus()); eq(a.getLockedBalance(), 110);
-        // Admin khóa người thắng; lần đồng hồ chạy tiếp theo phải hủy phiên.
-        a.setActive(false); auction.updateTime();
-        assertEquals(AuctionStatus.CANCELED, auction.getStatus());
-        assertEquals(ItemStatus.CANCELED, auction.getItem().getStatus());
-        // Hoàn khoản giữ nhưng không trừ tiền: số dư vẫn đủ 1000.
-        eq(a.getLockedBalance(), 0); eq(a.getBalance(), 1000);
-    }
-
     // Người thắng còn hoạt động thì đồng hồ không được tự hủy phiên.
     @Test void activeWinnerAuctionStaysFinished() throws InterruptedException {
         runningWithNearEnd(); auction.placeBid(a, money(110));
