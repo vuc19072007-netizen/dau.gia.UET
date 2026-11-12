@@ -1,6 +1,7 @@
 package model.user;
 
 import java.math.BigDecimal;
+import exception.InsufficientFundsException;
 
 public class Seller extends User implements Payable {
     private BigDecimal balance;
@@ -30,7 +31,7 @@ public class Seller extends User implements Payable {
             throw new IllegalArgumentException("Số tiền rút phải lớn hơn 0!");
         }
         if (amount.compareTo(this.balance) > 0) {
-            throw new IllegalArgumentException(
+            throw new InsufficientFundsException(
                     "Số tiền rút (" + amount + ") vượt quá số dư hiện có (" + this.balance + ")!");
         }
         this.balance = this.balance.subtract(amount);

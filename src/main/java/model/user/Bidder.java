@@ -1,6 +1,7 @@
 package model.user;
 
 import java.math.BigDecimal;
+import exception.InsufficientFundsException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -11,6 +12,7 @@ import java.util.UUID;
  * Phương thức synchronized khóa trên chính đối tượng bidder: tại một thời điểm,
  * một luồng được xử lý số dư của người này. Gọi lại hàm synchronized trên cùng
  * đối tượng từ luồng đang giữ khóa là hợp lệ (khóa có tính reentrant).
+ * Thiếu tiền thì ném InsufficientFundsException (kế thừa IllegalArgumentException).
  */
 public class Bidder extends User implements Payable, Biddable {
     private BigDecimal balance;
@@ -41,7 +43,7 @@ public class Bidder extends User implements Payable, Biddable {
         BigDecimal extra = total.subtract(old);
         if (extra.signum() < 0) throw new IllegalArgumentException("Không được giảm giá giữ");
         if (extra.compareTo(getAvailableBalance()) > 0)
-            throw new IllegalArgumentException("Số dư khả dụng không đủ");
+            throw new InsufficientFundsException("Số dư khả dụng không đủ");
         auctionFunds.put(key, total);
         lockedBalance = lockedBalance.add(extra);
         markUpdated();
@@ -111,7 +113,7 @@ public class Bidder extends User implements Payable, Biddable {
     // Lưu cấu hình bật/tắt và hạn mức; chưa phải thuật toán tự động đặt giá.
     public synchronized void enableAutoBid(BigDecimal maxLimit) {
         if (!canAfford(maxLimit)) {
-            throw new IllegalArgumentException("Số dư khả dụng không đủ");
+            throw new InsufficientFundsException("Số dư khả dụng không đủ");
         }
         this.maxBidLimit = maxLimit;
         this.autoBidEnabled = true;
@@ -147,7 +149,7 @@ public class Bidder extends User implements Payable, Biddable {
             throw new IllegalArgumentException("Số tiền thanh toán vượt quá số tiền đang khóa!");
         }
         if (amount.compareTo(this.balance) > 0) {
-            throw new IllegalArgumentException("Số dư không đủ để thanh toán!");
+            throw new InsufficientFundsException("Số dư không đủ để thanh toán!");
         }
         //trừ số tiền khóa của phiên đấu giá thắng
         this.balance = this.balance.subtract(amount);
@@ -173,7 +175,7 @@ public class Bidder extends User implements Payable, Biddable {
     @Override
     public synchronized void lockFunds(BigDecimal amount) {
         if (!canAfford(amount)) {
-            throw new IllegalArgumentException("Số dư không đủ để khóa");
+            throw new InsufficientFundsException("Số dư không đủ để khóa");
         }
         this.lockedBalance = this.lockedBalance.add(amount);
         markUpdated();
@@ -196,7 +198,7 @@ public class Bidder extends User implements Payable, Biddable {
         }
 
         if (amount.compareTo(getAvailableBalance()) > 0) {
-            throw new IllegalArgumentException("Số dư khả dụng không đủ để rút tiền!");
+            throw new InsufficientFundsException("Số dư khả dụng không đủ để rút tiền!");
         }
 
         this.balance = this.balance.subtract(amount);

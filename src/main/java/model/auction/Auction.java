@@ -1,5 +1,9 @@
 package model.auction;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -10,6 +14,8 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import exception.AuctionStateException;
+import exception.InvalidBidException;
 import model.item.Item;
 import model.item.ItemStatus;
 import model.user.Bidder;
@@ -21,8 +27,19 @@ import model.user.Admin;
  * Một phiên đấu giá: quản lý giá, lịch sử, trạng thái và danh sách Observer.
  * bidLock bảo vệ chuỗi đọc -> kiểm tra -> cập nhật, tránh hai luồng cùng dùng giá cũ.
  * notifyObservers gọi sau khi bỏ bidLock để giao diện/observer chậm không chặn đặt giá.
+ * <p>
+ * Lỗi nghiệp vụ dùng ngoại lệ chung của nhóm (gói exception):
+ * - InvalidBidException: lượt đặt giá không hợp lệ (người đặt, số tiền, bước giá).
+ * - AuctionStateException: thao tác sai trạng thái hoặc sai thời gian của phiên.
+ * - InsufficientFundsException: thiếu tiền, do ví Bidder ném ra.
+ * Ba lớp này kế thừa IllegalArgumentException/IllegalStateException nên code cũ
+ * đang bắt hai loại đó vẫn chạy đúng.
+ * <p>
+ * Serializable để DataStore lưu/tải phiên ra file.
  */
-public class Auction {
+public class Auction implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private static final Logger LOGGER =
             Logger.getLogger(Auction.class.getName());
 
@@ -43,7 +60,10 @@ public class Auction {
 
     private final List<Bid> bidHistory = new ArrayList<>();
 
-    private final List<AuctionObserver> observers =
+    // transient: không ghi observer ra file. Observer là giao diện/kết nối mạng
+    // của lần chạy hiện tại, không serialize được và cũng vô nghĩa sau khi khởi
+    // động lại. readObject() tạo lại danh sách rỗng.
+    private transient List<AuctionObserver> observers =
             new ArrayList<>();
 
     // Bảo vệ dữ liệu phiên khi nhiều luồng cùng truy cập.
@@ -105,19 +125,19 @@ public class Auction {
 
         try {
             if (status != AuctionStatus.OPEN) {
-                throw new IllegalStateException(
+                throw new AuctionStateException(
                         "Chỉ bắt đầu được phiên OPEN");
             }
 
             LocalDateTime now = LocalDateTime.now();
 
             if (now.isBefore(startTime)) {
-                throw new IllegalStateException(
+                throw new AuctionStateException(
                         "Chưa đến thời gian bắt đầu");
             }
 
             if (!now.isBefore(endTime)) {
-                throw new IllegalStateException(
+                throw new AuctionStateException(
                         "Đã hết thời gian tổ chức phiên");
             }
 
@@ -137,6 +157,11 @@ public class Auction {
                         AuctionStatus.RUNNING));
     }
 
+    /*
+     * Đặt giá. Cả chuỗi kiểm tra -> giữ tiền -> ghi nhận nằm trong bidLock nên
+     * hai luồng không thể cùng dùng một giá cũ (chống race condition/lost update).
+     * Hàm chỉ điều phối; từng bước nằm trong một hàm private bên dưới.
+     */
     public boolean placeBid(Bidder bidder, BigDecimal amount) {
         Bid newBid;
         List<AuctionObserver> listeners;
@@ -144,68 +169,12 @@ public class Auction {
         bidLock.lock();
 
         try {
-            if (bidder == null) {
-                throw new IllegalArgumentException(
-                        "Người đặt giá không được null");
-            }
-
-            if (!bidder.isActive()) {
-                throw new IllegalArgumentException(
-                        "Tài khoản người đặt giá đang bị khóa");
-            }
-
-            if (seller.getId().equals(bidder.getId())) {
-                throw new IllegalArgumentException(
-                        "Không được đặt giá sản phẩm của chính mình");
-            }
-
-            if (amount == null || amount.signum() <= 0) {
-                throw new IllegalArgumentException(
-                        "Giá đặt phải lớn hơn 0");
-            }
-
-            if (status != AuctionStatus.RUNNING) {
-                throw new IllegalStateException(
-                        "Phiên không ở trạng thái RUNNING");
-            }
-
-            LocalDateTime now = LocalDateTime.now();
-
-            if (now.isBefore(startTime)
-                    || !now.isBefore(endTime)) {
-                throw new IllegalStateException(
-                        "Ngoài thời gian đặt giá");
-            }
-
-            // Quy tắc của nhóm: áp dụng bước giá từ cả lượt đặt đầu tiên.
-            BigDecimal minimumAmount = currentPrice.add(minimumIncrement);
-
-            if (amount.compareTo(minimumAmount) < 0) {
-                throw new IllegalArgumentException(
-                        "Giá đặt tối thiểu là " + minimumAmount);
-            }
+            validateBidder(bidder);
+            validateAuctionAcceptsBids();
+            validateAmount(amount);
 
             newBid = new Bid(bidder, amount);
-
-            Bid previousBid = highestBid;
-
-            // Một thứ tự khóa chung cho các phiên đổi tiền giữa nhiều bidder.
-            // Ví: synchronized từng đối tượng. Phiên: ReentrantLock.
-            synchronized (Bidder.class) {
-                synchronized (bidder) {
-                    if (previousBid != null && previousBid.getBidder() != bidder
-                            && previousBid.getBidder().getId().equals(bidder.getId())) {
-                        throw new IllegalArgumentException("Hãy dùng đúng đối tượng tài khoản đã đăng nhập");
-                    }
-                    // reserveForAuction tự tính phần tăng thêm cho chính phiên này.
-                    // Nếu thiếu tiền, nó ném lỗi trước khi thay đổi số dư.
-                    bidder.reserveForAuction(fundsKey, amount);
-                    if (previousBid != null && previousBid.getBidder() != bidder) {
-                        // Chỉ giải phóng tiền của phiên này; tiền phiên khác giữ nguyên.
-                        previousBid.getBidder().releaseAuctionFunds(fundsKey);
-                    }
-                }
-            }
+            moveReservedFunds(bidder, amount);
 
             // Chỉ ghi nhận người dẫn đầu sau khi thao tác tiền thành công.
             highestBid = newBid;
@@ -226,6 +195,84 @@ public class Auction {
         return true;
     }
 
+    // Người đặt phải tồn tại, chưa bị khóa và không phải người bán của phiên.
+    private void validateBidder(Bidder bidder) {
+        if (bidder == null) {
+            throw new InvalidBidException(
+                    "Người đặt giá không được null");
+        }
+
+        if (!bidder.isActive()) {
+            throw new InvalidBidException(
+                    "Tài khoản người đặt giá đang bị khóa");
+        }
+
+        if (seller.getId().equals(bidder.getId())) {
+            throw new InvalidBidException(
+                    "Không được đặt giá sản phẩm của chính mình");
+        }
+    }
+
+    // Phiên phải đang RUNNING và còn trong khoảng thời gian nhận giá.
+    private void validateAuctionAcceptsBids() {
+        if (status != AuctionStatus.RUNNING) {
+            throw new AuctionStateException(
+                    "Phiên không ở trạng thái RUNNING");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (now.isBefore(startTime)
+                || !now.isBefore(endTime)) {
+            throw new AuctionStateException(
+                    "Ngoài thời gian đặt giá");
+        }
+    }
+
+    // Số tiền phải dương và đạt tối thiểu giá hiện tại + bước giá.
+    private void validateAmount(BigDecimal amount) {
+        if (amount == null || amount.signum() <= 0) {
+            throw new InvalidBidException(
+                    "Giá đặt phải lớn hơn 0");
+        }
+
+        // Quy tắc của nhóm: áp dụng bước giá từ cả lượt đặt đầu tiên.
+        BigDecimal minimumAmount = currentPrice.add(minimumIncrement);
+
+        if (amount.compareTo(minimumAmount) < 0) {
+            throw new InvalidBidException(
+                    "Giá đặt tối thiểu là " + minimumAmount);
+        }
+    }
+
+    /*
+     * Giữ tiền của người đặt mới và hoàn tiền cho người dẫn đầu cũ.
+     * Thiếu tiền thì reserveForAuction() ném InsufficientFundsException trước khi
+     * đổi bất kỳ số dư nào, nên phiên và các ví không bị sửa dở dang.
+     */
+    private void moveReservedFunds(Bidder bidder, BigDecimal amount) {
+        Bidder previousLeader =
+                highestBid == null ? null : highestBid.getBidder();
+
+        // Một thứ tự khóa chung cho các phiên đổi tiền giữa nhiều bidder.
+        // Ví: synchronized từng đối tượng. Phiên: ReentrantLock.
+        synchronized (Bidder.class) {
+            synchronized (bidder) {
+                if (previousLeader != null && previousLeader != bidder
+                        && previousLeader.getId().equals(bidder.getId())) {
+                    throw new InvalidBidException(
+                            "Hãy dùng đúng đối tượng tài khoản đã đăng nhập");
+                }
+                // reserveForAuction tự tính phần tăng thêm cho chính phiên này.
+                bidder.reserveForAuction(fundsKey, amount);
+                if (previousLeader != null && previousLeader != bidder) {
+                    // Chỉ giải phóng tiền của phiên này; tiền phiên khác giữ nguyên.
+                    previousLeader.releaseAuctionFunds(fundsKey);
+                }
+            }
+        }
+    }
+
     // RUNNING -> FINISHED.
     public void finishAuction() {
         Bidder winner;
@@ -235,12 +282,12 @@ public class Auction {
 
         try {
             if (status != AuctionStatus.RUNNING) {
-                throw new IllegalStateException(
+                throw new AuctionStateException(
                         "Chỉ kết thúc được phiên RUNNING");
             }
 
             if (LocalDateTime.now().isBefore(endTime)) {
-                throw new IllegalStateException(
+                throw new AuctionStateException(
                         "Chưa đến thời gian kết thúc");
             }
 
@@ -280,12 +327,12 @@ public class Auction {
 
         try {
             if (status != AuctionStatus.FINISHED) {
-                throw new IllegalStateException(
+                throw new AuctionStateException(
                         "Chỉ thanh toán được phiên FINISHED");
             }
 
             if (highestBid == null) {
-                throw new IllegalStateException(
+                throw new AuctionStateException(
                         "Phiên không có người thắng");
             }
 
@@ -426,14 +473,14 @@ public class Auction {
         try {
             if (status == AuctionStatus.PAID
                     || status == AuctionStatus.CANCELED) {
-                throw new IllegalStateException(
+                throw new AuctionStateException(
                         "Không thể hủy phiên đã thanh toán hoặc đã hủy");
             }
 
             // Phiên không ai đặt đã giải quyết xong; sản phẩm có thể
             // được đăng lại. Không để phiên cũ sửa sản phẩm lần nữa.
             if (status == AuctionStatus.FINISHED && highestBid == null) {
-                throw new IllegalStateException(
+                throw new AuctionStateException(
                         "Phiên đã kết thúc mà không có người đặt giá");
             }
 
@@ -512,6 +559,28 @@ public class Auction {
                         exception);
             }
         }
+    }
+
+    /*
+     * Hai hàm đặc biệt mà Java Serialization tự gọi khi ghi/đọc đối tượng.
+     * writeObject giữ bidLock để file không chứa trạng thái dở dang nếu có
+     * người đặt giá đúng lúc đang lưu.
+     * readObject tạo lại danh sách observer (trường transient đọc lên là null).
+     */
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        bidLock.lock();
+
+        try {
+            out.defaultWriteObject();
+        } finally {
+            bidLock.unlock();
+        }
+    }
+
+    private void readObject(ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        observers = new ArrayList<>();
     }
 
     public String getAuctionId() {
