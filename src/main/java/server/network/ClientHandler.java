@@ -514,21 +514,29 @@ public class ClientHandler implements Runnable {
      * Đóng kết nối và giải phóng tài nguyên.
      */
     public void close() {
-        if (!connected) return;
+        if (!connected) {
+            return;
+        }
         connected = false;
 
         server.unregisterClient(this);
 
         try {
-            if (in != null) in.close();
+            if (in != null) {
+                in.close();
+            }
         } catch (IOException ignored) {}
 
         try {
-            if (out != null) out.close();
+            if (out != null) {
+                out.close();
+            }
         } catch (IOException ignored) {}
 
         try {
-            if (!socket.isClosed()) socket.close();
+            if (!socket.isClosed()) {
+                socket.close();
+            }
         } catch (IOException ignored) {}
 
         LOGGER.info(() -> "Đã đóng kết nối với Client: " + socket.getRemoteSocketAddress());

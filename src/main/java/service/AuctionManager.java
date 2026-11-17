@@ -38,7 +38,9 @@ public final class AuctionManager {
 
     // synchronized khóa manager, ngăn hai nơi cùng tạo hai đồng hồ.
     public synchronized void startClock() {
-        if (clock != null && !clock.isShutdown()) return;
+        if (clock != null && !clock.isShutdown()) {
+            return;
+        }
         clock = Executors.newSingleThreadScheduledExecutor(task -> {
             Thread thread = new Thread(task, "auction-clock");
             // Daemon không giữ JVM sống nếu ứng dụng đã đóng mọi luồng chính.

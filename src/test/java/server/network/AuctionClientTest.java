@@ -76,9 +76,15 @@ class AuctionClientTest {
 
     @AfterEach
     void tearDown() {
-        if (client1 != null) client1.disconnect();
-        if (client2 != null) client2.disconnect();
-        if (server != null) server.stop();
+        if (client1 != null) {
+            client1.disconnect();
+        }
+        if (client2 != null) {
+            client2.disconnect();
+        }
+        if (server != null) {
+            server.stop();
+        }
         AuctionManager.getInstance().reset();
     }
 

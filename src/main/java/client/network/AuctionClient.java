@@ -60,7 +60,9 @@ public class AuctionClient {
      * Mở kết nối Socket tới Server và bắt đầu luồng lắng nghe.
      */
     public synchronized void connect() throws IOException {
-        if (connected) return;
+        if (connected) {
+            return;
+        }
 
         socket = new Socket(host, port);
 
@@ -263,19 +265,27 @@ public class AuctionClient {
     }
 
     public synchronized void disconnect() {
-        if (!connected) return;
+        if (!connected) {
+            return;
+        }
         connected = false;
 
         try {
-            if (in != null) in.close();
+            if (in != null) {
+                in.close();
+            }
         } catch (IOException ignored) {}
 
         try {
-            if (out != null) out.close();
+            if (out != null) {
+                out.close();
+            }
         } catch (IOException ignored) {}
 
         try {
-            if (socket != null && !socket.isClosed()) socket.close();
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
         } catch (IOException ignored) {}
 
         CompletableFuture<NetworkMessage> future;

@@ -28,22 +28,28 @@ public class Bidder extends User implements Payable, Biddable {
     // Hàm private này chỉ được gọi khi phương thức synchronized đã giữ khóa ví.
     private BigDecimal manualLockedBalance() {
         BigDecimal auctionTotal = BigDecimal.ZERO;
-        for (BigDecimal amount : auctionFunds.values()) auctionTotal = auctionTotal.add(amount);
+        for (BigDecimal amount : auctionFunds.values()) {
+            auctionTotal = auctionTotal.add(amount);
+        }
         return lockedBalance.subtract(auctionTotal);
     }
 
     // key được phiên giữ kín. total là tổng giá đặt, không phải phần tăng thêm.
     public synchronized void reserveForAuction(UUID key, BigDecimal total) {
-        if (key == null || total == null || total.signum() <= 0)
+        if (key == null || total == null || total.signum() <= 0) {
             throw new IllegalArgumentException("Khoản giữ không hợp lệ");
+        }
         // Chưa từng giữ tiền cho phiên thì old = 0.
         BigDecimal old = auctionFunds.getOrDefault(key, BigDecimal.ZERO);
         // Ví dụ đã giữ 100, đặt lên 150 thì chỉ cần thêm 50.
         // BigDecimal không sửa chính nó; add/subtract trả về một giá trị mới.
         BigDecimal extra = total.subtract(old);
-        if (extra.signum() < 0) throw new IllegalArgumentException("Không được giảm giá giữ");
-        if (extra.compareTo(getAvailableBalance()) > 0)
+        if (extra.signum() < 0) {
+            throw new IllegalArgumentException("Không được giảm giá giữ");
+        }
+        if (extra.compareTo(getAvailableBalance()) > 0) {
             throw new InsufficientFundsException("Số dư khả dụng không đủ");
+        }
         auctionFunds.put(key, total);
         lockedBalance = lockedBalance.add(extra);
         markUpdated();
@@ -63,8 +69,9 @@ public class Bidder extends User implements Payable, Biddable {
     // Xóa khoản giữ để không thể thanh toán cùng khoản đó thêm lần nữa.
     public synchronized void payAuctionFunds(UUID key, BigDecimal amount) {
         BigDecimal reserved = auctionFunds.get(key);
-        if (amount == null || amount.signum() <= 0 || reserved == null || reserved.compareTo(amount) != 0)
+        if (amount == null || amount.signum() <= 0 || reserved == null || reserved.compareTo(amount) != 0) {
             throw new IllegalStateException("Tiền thanh toán không khớp khoản giữ của phiên");
+        }
         balance = balance.subtract(amount);
         lockedBalance = lockedBalance.subtract(reserved);
         auctionFunds.remove(key);

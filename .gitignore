@@ -1,0 +1,7 @@
+/target/
+/out/
+/.idea/
+*.iml
+
+# Du lieu luu cua server khi chay thu
+auction-data.ser

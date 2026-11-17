@@ -446,7 +446,9 @@ public class Auction implements Serializable {
             } else if (status == AuctionStatus.RUNNING && !now.isBefore(endTime)) {
                 status = AuctionStatus.FINISHED;
                 winner = highestBid == null ? null : highestBid.getBidder();
-                if (winner == null) item.setStatus(ItemStatus.UNSOLD);
+                if (winner == null) {
+                    item.setStatus(ItemStatus.UNSOLD);
+                }
             } else {
                 return;
             }

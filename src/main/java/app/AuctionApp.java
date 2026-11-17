@@ -39,7 +39,9 @@ public class AuctionApp extends Application {
     private void detachObservers() {
         screenVersion++;
         if (screenObserver != null) {
-            for (Auction auction : observedAuctions) auction.removeObserver(screenObserver);
+            for (Auction auction : observedAuctions) {
+                auction.removeObserver(screenObserver);
+            }
         }
         observedAuctions.clear();
         screenObserver = null;
@@ -67,7 +69,9 @@ public class AuctionApp extends Application {
 
     private void seedData() {
         // Đây là dữ liệu giả lập để học giao diện, không đọc từ cơ sở dữ liệu.
-        if (!manager.getAllAuction().isEmpty()) return;
+        if (!manager.getAllAuction().isEmpty()) {
+            return;
+        }
         Seller seller = new Seller(
                 "Người bán mẫu",
                 "0912345678",
@@ -174,7 +178,9 @@ public class AuctionApp extends Application {
                 // Chỉ JavaFX Application Thread được thay đổi các control.
                 Platform.runLater(() -> {
                     // Đã logout/đổi màn hình thì bỏ thông báo cũ đang chờ.
-                    if (version != screenVersion) return;
+                    if (version != screenVersion) {
+                        return;
+                    }
                     listView.refresh();
                     message.setText(text);
                 });
@@ -194,10 +200,14 @@ public class AuctionApp extends Application {
         // Runnable là hành động không nhận tham số, không trả về giá trị.
         // Tải lại danh sách cần gỡ đăng ký cũ rồi đăng ký trên danh sách mới.
         Runnable reload = () -> {
-            for (Auction auction : observedAuctions) auction.removeObserver(screenObserver);
+            for (Auction auction : observedAuctions) {
+                auction.removeObserver(screenObserver);
+            }
             observedAuctions.clear();
             observedAuctions.addAll(manager.getAllAuction());
-            for (Auction auction : observedAuctions) auction.addObserver(screenObserver);
+            for (Auction auction : observedAuctions) {
+                auction.addObserver(screenObserver);
+            }
             listView.getItems().setAll(observedAuctions);
         };
         reload.run();

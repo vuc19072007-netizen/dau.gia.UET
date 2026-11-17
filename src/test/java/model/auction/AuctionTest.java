@@ -35,7 +35,9 @@ class AuctionTest {
         running();
     }
     void awaitEnd() throws InterruptedException {
-        while (LocalDateTime.now().isBefore(end)) Thread.sleep(10);
+        while (LocalDateTime.now().isBefore(end)) {
+            Thread.sleep(10);
+        }
     }
     void finish() throws InterruptedException { awaitEnd(); auction.finishAuction(); }
     void eq(BigDecimal value, long expected) { assertEquals(0, value.compareTo(money(expected))); }
@@ -188,7 +190,9 @@ class AuctionTest {
             }
             startGate.countDown();
             // get() chờ luồng xong; nếu luồng ném lỗi lạ thì test thất bại tại đây.
-            for (Future<?> result : results) result.get(5, TimeUnit.SECONDS);
+            for (Future<?> result : results) {
+                result.get(5, TimeUnit.SECONDS);
+            }
         } finally { pool.shutdownNow(); }
 
         assertEquals(1, accepted.get());
@@ -234,7 +238,9 @@ class AuctionTest {
                 BigDecimal amount = money(100+i*10);
                 work.add(() -> { try { auction.placeBid(a, amount); } catch (IllegalArgumentException expected) {} return null; });
             }
-            for (Future<Void> result : pool.invokeAll(work, 5, TimeUnit.SECONDS)) result.get();
+            for (Future<Void> result : pool.invokeAll(work, 5, TimeUnit.SECONDS)) {
+                result.get();
+            }
             eq(auction.getCurrentPrice(), 390); eq(a.getLockedBalance(), 390);
         } finally { pool.shutdownNow(); }
     }

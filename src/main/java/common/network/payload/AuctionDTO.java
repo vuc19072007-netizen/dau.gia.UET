@@ -36,7 +36,9 @@ public class AuctionDTO implements Serializable {
     }
 
     public static AuctionDTO fromAuction(Auction auction) {
-        if (auction == null) return null;
+        if (auction == null) {
+            return null;
+        }
 
         AuctionDTO dto = new AuctionDTO();
         dto.setAuctionId(auction.getAuctionId());

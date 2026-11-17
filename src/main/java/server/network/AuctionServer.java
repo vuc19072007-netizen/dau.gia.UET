@@ -160,7 +160,9 @@ public class AuctionServer {
      * @param excludeClient ClientHandler cần loại trừ (hoặc null nếu gửi cho tất cả)
      */
     public void broadcast(NetworkMessage message, ClientHandler excludeClient) {
-        if (message == null) return;
+        if (message == null) {
+            return;
+        }
 
         for (ClientHandler client : connectedClients) {
             if (excludeClient != null && client.equals(excludeClient)) {

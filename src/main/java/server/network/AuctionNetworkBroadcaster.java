@@ -38,7 +38,9 @@ public class AuctionNetworkBroadcaster implements AuctionObserver {
      */
     @Override
     public void onNewBid(Auction auction, Bid bid) {
-        if (auction == null || bid == null) return;
+        if (auction == null || bid == null) {
+            return;
+        }
 
         try {
             BidNotificationPayload payload = new BidNotificationPayload(
@@ -74,7 +76,9 @@ public class AuctionNetworkBroadcaster implements AuctionObserver {
      */
     @Override
     public void onAuctionStatusChanged(Auction auction, AuctionStatus oldStatus, AuctionStatus newStatus) {
-        if (auction == null) return;
+        if (auction == null) {
+            return;
+        }
 
         LOGGER.info(() -> String.format(
                 "[AUCTION STATUS CHANGED] Auction %s: %s -> %s",
@@ -94,7 +98,9 @@ public class AuctionNetworkBroadcaster implements AuctionObserver {
      */
     @Override
     public void onAuctionEnded(Auction auction, Bidder winner) {
-        if (auction == null) return;
+        if (auction == null) {
+            return;
+        }
 
         LOGGER.info(() -> String.format(
                 "[AUCTION ENDED] Auction %s ended. Winner: %s",
