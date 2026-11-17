@@ -20,6 +20,7 @@ import model.user.Admin;
 import model.user.Bidder;
 import model.user.Seller;
 import model.user.User;
+import persistence.DataStore;
 
 public final class AuctionManager {
 
@@ -68,6 +69,82 @@ public final class AuctionManager {
             clock.shutdownNow();
             clock = null;
         }
+    }
+
+    /*
+     * Đưa manager về trạng thái trống: dừng đồng hồ, xóa hết người dùng, sản phẩm
+     * và phiên. Vì AuctionManager là Singleton (cả chương trình dùng chung một
+     * đối tượng), dữ liệu của test trước sẽ còn nguyên ở test sau nếu không xóa.
+     * Các test gọi hàm này trong @BeforeEach/@AfterEach để mỗi test bắt đầu sạch.
+     * Chỉ dùng cho test và khi tải lại dữ liệu; không gọi lúc server đang phục vụ.
+     */
+    public synchronized void reset() {
+        stopClock();
+        auctions.clear();
+        users.clear();
+        items.clear();
+    }
+
+    // ===================== LƯU / TẢI DỮ LIỆU (dùng DataStore của Người 5) =====================
+
+    /*
+     * Ghi toàn bộ người dùng và phiên đấu giá ra file.
+     * synchronized: trong lúc chụp hai danh sách, không ai thêm/xóa được.
+     * Truyền bản sao (List.copyOf) để DataStore không giữ danh sách gốc.
+     * Nên gọi lúc tắt server hoặc lúc hệ thống đang rảnh: ví của từng Bidder và
+     * từng phiên được khóa riêng, nên nếu có lượt đặt giá chạy đúng lúc đang ghi
+     * thì ví và phiên trong file có thể lệch nhau một lượt.
+     * Giới hạn: DataStore hiện chỉ lưu người dùng và phiên. Sản phẩm đã từng lên
+     * phiên được lưu kèm trong phiên; sản phẩm CHƯA có phiên nào thì không được lưu.
+     */
+    public synchronized void saveTo(DataStore store) {
+        if (store == null) {
+            throw new IllegalArgumentException(
+                    "Thiếu nơi lưu dữ liệu");
+        }
+
+        store.save(List.copyOf(users), List.copyOf(auctions));
+    }
+
+    /*
+     * Thay toàn bộ dữ liệu đang có bằng dữ liệu trong file.
+     * Trả về false nếu file chưa tồn tại (lần chạy đầu tiên); khi đó dữ liệu
+     * hiện tại được giữ nguyên.
+     * Kho sản phẩm được dựng lại từ các phiên, vì file không lưu riêng sản phẩm.
+     * Sau khi tải, danh sách observer của mọi phiên đều rỗng (xem Auction):
+     * Server 2 và giao diện phải đăng ký lại bằng addObserver().
+     * Gọi hàm này TRƯỚC khi mở server để chưa có client nào giữ đối tượng cũ.
+     */
+    public synchronized boolean loadFrom(DataStore store) {
+        if (store == null) {
+            throw new IllegalArgumentException(
+                    "Thiếu nơi lưu dữ liệu");
+        }
+
+        DataStore.SystemState state = store.load();
+
+        if (state == null) {
+            return false;
+        }
+
+        auctions.clear();
+        users.clear();
+        items.clear();
+
+        users.addAll(state.getUsers());
+        auctions.addAll(state.getAuctions());
+
+        for (Auction auction : auctions) {
+            Item item = auction.getItem();
+
+            // Một sản phẩm có thể xuất hiện ở nhiều phiên (đăng lại sau khi hủy);
+            // chỉ đưa vào kho một lần.
+            if (findItem(item.getId()) == null) {
+                items.add(item);
+            }
+        }
+
+        return true;
     }
 
     // Ngăn các lớp khác gọi new AuctionManager().

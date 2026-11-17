@@ -201,30 +201,17 @@ public class ClientHandler implements Runnable {
 
         try {
             String role = regPayload.getRole() != null ? regPayload.getRole().toUpperCase() : "BIDDER";
-            User newUser;
 
-            switch (role) {
-                case "SELLER" -> newUser = new Seller(
-                        regPayload.getName(),
-                        regPayload.getPhoneNumber(),
-                        regPayload.getPassword(),
-                        regPayload.getAddress()
-                );
-                case "ADMIN" -> newUser = new Admin(
-                        regPayload.getName(),
-                        regPayload.getPhoneNumber(),
-                        regPayload.getPassword(),
-                        regPayload.getAddress()
-                );
-                default -> newUser = new Bidder(
-                        regPayload.getName(),
-                        regPayload.getPhoneNumber(),
-                        regPayload.getPassword(),
-                        regPayload.getAddress()
-                );
-            }
-
-            AuctionManager.getInstance().addUser(newUser);
+            // Đăng ký đi qua AuctionManager.register(): hàm này chỉ nhận BIDDER hoặc
+            // SELLER. Không tự tạo Admin ở đây, nếu không bất kỳ client nào cũng tự
+            // cấp quyền quản trị cho mình được bằng cách gửi role = "ADMIN".
+            User newUser = AuctionManager.getInstance().register(
+                    role,
+                    regPayload.getName(),
+                    regPayload.getPhoneNumber(),
+                    regPayload.getPassword(),
+                    regPayload.getAddress()
+            );
             LOGGER.info(() -> "Đăng ký người dùng mới thành công: " + newUser.getName() + " (" + role + ")");
             sendMessage(NetworkMessage.createSuccessResponse(
                     MessageType.ACTION_SUCCESS,
