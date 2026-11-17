@@ -12,6 +12,9 @@ jobs:
   build-and-test:
     name: Build & Test
     runs-on: ubuntu-latest
+    # Quá 15 phút thì tự dừng. Không có dòng này, một test bị treo sẽ giữ máy CI
+    # tới 6 tiếng rồi mới bị GitHub hủy.
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -31,8 +34,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      # Máy CI không có màn hình, nên test giao diện JavaFX (AuctionAppTest) bị
+      # treo khi mở cửa sổ. xvfb-run tạo một màn hình ảo cho lệnh chạy bên trong.
       - name: Build and test with Maven
-        run: mvn -B verify
+        run: xvfb-run -a mvn -B verify
 
       - name: Upload test report
         if: always()
