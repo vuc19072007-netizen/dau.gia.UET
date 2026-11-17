@@ -5,9 +5,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -15,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import exception.AuctionStateException;
+import exception.InsufficientFundsException;
 import exception.InvalidBidException;
 import model.item.Item;
 import model.item.ItemStatus;
@@ -53,7 +56,27 @@ public class Auction implements Serializable {
     private final BigDecimal minimumIncrement;
 
     private final LocalDateTime startTime;
-    private final LocalDateTime endTime;
+    // Không còn final: Anti-sniping có thể gia hạn giờ kết thúc.
+    // Mọi lần đọc/ghi endTime đều nằm trong bidLock.
+    private LocalDateTime endTime;
+
+    // ===== Anti-sniping =====
+    // Lượt đặt giá rơi vào SNIPING_WINDOW cuối phiên thì phiên được kéo dài thêm
+    // EXTENSION. Mục đích: không ai thắng được bằng cách đặt giá ở giây cuối cùng
+    // khi người khác không còn kịp phản ứng.
+    public static final Duration SNIPING_WINDOW = Duration.ofSeconds(30);
+    public static final Duration EXTENSION = Duration.ofSeconds(30);
+    // Mặc định tắt; người bán bật khi tạo phiên.
+    private boolean antiSnipingEnabled;
+
+    // ===== Auto-bidding =====
+    // Hàng đợi ưu tiên: phần tử đứng đầu là cấu hình có giá tối đa cao nhất,
+    // bằng nhau thì ai đăng ký trước đứng trước (xem AutoBid.compareTo).
+    private final PriorityQueue<AutoBid> autoBids = new PriorityQueue<>();
+    // Số thứ tự đăng ký, dùng để phân xử khi hai người cùng giá tối đa.
+    private long autoBidSequence;
+    // Chặn vòng lặp vô hạn nếu có lỗi logic: tối đa ngần này lượt tự động mỗi lần.
+    private static final int MAX_AUTO_BIDS_PER_ROUND = 1000;
 
     private AuctionStatus status;
     private Bid highestBid;
@@ -163,7 +186,9 @@ public class Auction implements Serializable {
      * Hàm chỉ điều phối; từng bước nằm trong một hàm private bên dưới.
      */
     public boolean placeBid(Bidder bidder, BigDecimal amount) {
-        Bid newBid;
+        // Một lượt đặt tay có thể kéo theo nhiều lượt đặt tự động (auto-bid).
+        // Gom tất cả vào danh sách để thông báo sau khi bỏ khóa.
+        List<Bid> newBids = new ArrayList<>();
         List<AuctionObserver> listeners;
 
         bidLock.lock();
@@ -173,13 +198,9 @@ public class Auction implements Serializable {
             validateAuctionAcceptsBids();
             validateAmount(amount);
 
-            newBid = new Bid(bidder, amount);
-            moveReservedFunds(bidder, amount);
-
-            // Chỉ ghi nhận người dẫn đầu sau khi thao tác tiền thành công.
-            highestBid = newBid;
-            currentPrice = amount;
-            bidHistory.add(newBid);
+            newBids.add(recordBid(bidder, amount));
+            // Người khác có cấu hình auto-bid sẽ tự trả giá lại (nếu còn hạn mức).
+            resolveAutoBids(newBids);
 
             listeners = List.copyOf(observers);
 
@@ -187,12 +208,50 @@ public class Auction implements Serializable {
             bidLock.unlock();
         }
 
-        // Gửi thông báo ngoài vùng khóa.
-        notifyObservers(
-                listeners,
-                observer -> observer.onNewBid(this, newBid));
+        // Gửi thông báo ngoài vùng khóa, đúng thứ tự các lượt đã xảy ra.
+        notifyNewBids(listeners, newBids);
 
         return true;
+    }
+
+    /*
+     * Ghi nhận một lượt đặt giá đã qua kiểm tra người đặt/trạng thái/số tiền.
+     * Phải được gọi khi đang giữ bidLock.
+     * Thứ tự: giữ tiền trước, ghi giá sau. Thiếu tiền thì ném lỗi ngay ở bước
+     * giữ tiền, phiên chưa bị đổi gì.
+     */
+    private Bid recordBid(Bidder bidder, BigDecimal amount) {
+        Bid newBid = new Bid(bidder, amount);
+        moveReservedFunds(bidder, amount);
+
+        // Chỉ ghi nhận người dẫn đầu sau khi thao tác tiền thành công.
+        highestBid = newBid;
+        currentPrice = amount;
+        bidHistory.add(newBid);
+
+        applyAntiSniping();
+        return newBid;
+    }
+
+    /*
+     * Anti-sniping: nếu lượt đặt giá xảy ra khi phiên còn <= SNIPING_WINDOW thì
+     * cộng thêm EXTENSION vào giờ kết thúc. So bằng Duration (đến từng nano giây)
+     * chứ không cắt về giây, để lượt đặt ở 0,8 giây cuối vẫn được gia hạn.
+     * Gọi trong bidLock nên không chạy xen với đồng hồ đóng phiên.
+     */
+    private void applyAntiSniping() {
+        if (!antiSnipingEnabled) {
+            return;
+        }
+
+        Duration remaining = Duration.between(LocalDateTime.now(), endTime);
+
+        if (!remaining.isNegative()
+                && remaining.compareTo(SNIPING_WINDOW) <= 0) {
+            endTime = endTime.plus(EXTENSION);
+            LOGGER.info(() -> "Anti-sniping: phiên " + auctionId
+                    + " được gia hạn tới " + endTime);
+        }
     }
 
     // Người đặt phải tồn tại, chưa bị khóa và không phải người bán của phiên.
@@ -295,6 +354,8 @@ public class Auction implements Serializable {
                 item.setStatus(ItemStatus.UNSOLD);
             }
             status = AuctionStatus.FINISHED;
+            // Phiên đóng thì các cấu hình tự động không còn ý nghĩa.
+            autoBids.clear();
 
             winner = highestBid == null
                     ? null
@@ -445,6 +506,7 @@ public class Auction implements Serializable {
             // Hết giờ: ngừng nhận giá. Có người thắng thì giữ tiền chờ thanh toán.
             } else if (status == AuctionStatus.RUNNING && !now.isBefore(endTime)) {
                 status = AuctionStatus.FINISHED;
+                autoBids.clear();
                 winner = highestBid == null ? null : highestBid.getBidder();
                 if (winner == null) {
                     item.setStatus(ItemStatus.UNSOLD);
@@ -496,6 +558,7 @@ public class Auction implements Serializable {
 
             item.setStatus(ItemStatus.CANCELED);
             status = AuctionStatus.CANCELED;
+            autoBids.clear();
             listeners = List.copyOf(observers);
 
         } finally {
@@ -508,6 +571,248 @@ public class Auction implements Serializable {
                         this,
                         oldStatus,
                         AuctionStatus.CANCELED));
+    }
+
+    // ===================== AUTO-BIDDING =====================
+
+    /*
+     * Đăng ký (hoặc thay) cấu hình đấu giá tự động cho một người mua.
+     * - maxBid: số tiền tối đa người mua chấp nhận trả.
+     * - increment: mỗi lần tự trả giá thì cộng thêm bao nhiêu. Nếu nhỏ hơn bước
+     *   giá của phiên thì dùng bước giá của phiên.
+     * Đăng ký xong, hệ thống chạy ngay một vòng: nếu người này chưa dẫn đầu và
+     * hạn mức còn đủ, họ được đặt giá tự động luôn.
+     * Trả về true nếu cấu hình còn hiệu lực sau vòng đó (chưa bị loại vì hết
+     * hạn mức hoặc thiếu tiền).
+     */
+    public boolean registerAutoBid(
+            Bidder bidder,
+            BigDecimal maxBid,
+            BigDecimal increment) {
+
+        List<Bid> newBids = new ArrayList<>();
+        List<AuctionObserver> listeners;
+        boolean stillActive;
+
+        bidLock.lock();
+
+        try {
+            validateBidder(bidder);
+            validateAuctionAcceptsBids();
+
+            if (maxBid == null || maxBid.signum() <= 0) {
+                throw new InvalidBidException(
+                        "Giá tối đa phải lớn hơn 0");
+            }
+
+            if (increment == null || increment.signum() <= 0) {
+                throw new InvalidBidException(
+                        "Bước tự động phải lớn hơn 0");
+            }
+
+            boolean leading = isLeader(bidder);
+            BigDecimal needed = leading
+                    ? currentPrice
+                    : currentPrice.add(minimumIncrement);
+
+            if (maxBid.compareTo(needed) < 0) {
+                throw new InvalidBidException(
+                        "Giá tối đa phải từ " + needed + " trở lên");
+            }
+
+            // Mỗi người chỉ có một cấu hình cho mỗi phiên: xóa cái cũ (nếu có).
+            removeAutoBidOf(bidder.getId());
+            autoBids.add(new AutoBid(bidder, maxBid, increment, autoBidSequence++));
+
+            resolveAutoBids(newBids);
+            stillActive = findAutoBid(bidder.getId()) != null;
+            listeners = List.copyOf(observers);
+
+        } finally {
+            bidLock.unlock();
+        }
+
+        notifyNewBids(listeners, newBids);
+        return stillActive;
+    }
+
+    // Hủy cấu hình tự động. Trả về false nếu người này chưa đăng ký.
+    public boolean cancelAutoBid(String bidderId) {
+        bidLock.lock();
+
+        try {
+            return removeAutoBidOf(bidderId);
+        } finally {
+            bidLock.unlock();
+        }
+    }
+
+    // Giá tối đa đang cấu hình của một người mua, null nếu không có.
+    public BigDecimal getAutoBidMax(String bidderId) {
+        bidLock.lock();
+
+        try {
+            AutoBid autoBid = findAutoBid(bidderId);
+            return autoBid == null ? null : autoBid.maxBid;
+        } finally {
+            bidLock.unlock();
+        }
+    }
+
+    /*
+     * Vòng xử lý auto-bid, gọi khi đang giữ bidLock. Cách làm giống "đấu giá ủy
+     * quyền" (proxy bidding): mỗi người cho hệ thống biết giá tối đa, hệ thống
+     * chỉ trả vừa đủ để dẫn đầu.
+     *
+     * Mỗi bước lấy "ứng viên": cấu hình có giá tối đa cao nhất mà KHÔNG phải của
+     * người đang dẫn đầu (thứ tự lấy từ hàng đợi ưu tiên). Sau đó so với cấu hình
+     * của người đang dẫn đầu (nếu người đó cũng bật auto-bid):
+     *
+     * 1. Người dẫn đầu không có auto-bid, hoặc ứng viên có hạn mức CAO HƠN:
+     *    ứng viên đặt mức vừa vượt hạn mức của người dẫn đầu
+     *    (hạn mức đó + bước của ứng viên), không quá hạn mức của chính mình.
+     *    Không có đối thủ tự động thì chỉ đặt giá hiện tại + bước.
+     * 2. Ứng viên có hạn mức THẤP HƠN HOẶC BẰNG người dẫn đầu: ứng viên không
+     *    thể thắng nên bị loại; người dẫn đầu được nâng giá lên đúng mức cạnh
+     *    tranh (bằng hạn mức ứng viên nếu hai hạn mức bằng nhau, ngược lại là
+     *    hạn mức ứng viên + bước của người dẫn đầu). Vì vậy khi hai người cùng
+     *    hạn mức, ai đăng ký trước (đang dẫn đầu) thắng.
+     *
+     * Cấu hình hết hạn mức hoặc ví không đủ tiền bị loại khỏi hàng đợi: giá chỉ
+     * tăng nên chúng không bao giờ dùng lại được.
+     */
+    private void resolveAutoBids(List<Bid> newBids) {
+        for (int round = 0; round < MAX_AUTO_BIDS_PER_ROUND; round++) {
+            AutoBid candidate = nextAutoBidder();
+
+            if (candidate == null) {
+                return;
+            }
+
+            AutoBid leaderAuto = highestBid == null
+                    ? null
+                    : findAutoBid(highestBid.getBidder().getId());
+            BigDecimal minimumNext = currentPrice.add(minimumIncrement);
+
+            if (leaderAuto == null
+                    || candidate.maxBid.compareTo(leaderAuto.maxBid) > 0) {
+                // Trường hợp 1: ứng viên vượt lên.
+                BigDecimal base = leaderAuto == null ? currentPrice : leaderAuto.maxBid;
+                BigDecimal amount = base.add(candidate.step(minimumIncrement))
+                        .min(candidate.maxBid)
+                        .max(minimumNext);
+                placeAutoBid(candidate, amount, newBids);
+            } else {
+                // Trường hợp 2: người dẫn đầu giữ được vị trí.
+                autoBids.remove(candidate);
+                BigDecimal target = candidate.maxBid.compareTo(leaderAuto.maxBid) == 0
+                        ? leaderAuto.maxBid
+                        : candidate.maxBid.add(leaderAuto.step(minimumIncrement))
+                                .min(leaderAuto.maxBid);
+
+                if (target.compareTo(minimumNext) >= 0) {
+                    placeAutoBid(leaderAuto, target, newBids);
+                }
+            }
+        }
+    }
+
+    // Đặt giá thay cho một cấu hình; ví không đủ tiền thì loại cấu hình đó.
+    private void placeAutoBid(AutoBid autoBid, BigDecimal amount, List<Bid> newBids) {
+        try {
+            newBids.add(recordBid(autoBid.bidder, amount));
+        } catch (InsufficientFundsException | InvalidBidException error) {
+            autoBids.remove(autoBid);
+        }
+    }
+
+    // Cấu hình được quyền trả giá tiếp theo, hoặc null nếu không còn ai.
+    private AutoBid nextAutoBidder() {
+        BigDecimal minimumNext = currentPrice.add(minimumIncrement);
+        List<AutoBid> ordered = new ArrayList<>(autoBids);
+        // Sao chép rồi sắp xếp: duyệt PriorityQueue trực tiếp không theo thứ tự.
+        ordered.sort(null);
+
+        for (AutoBid autoBid : ordered) {
+            if (isLeader(autoBid.bidder)) {
+                continue;
+            }
+
+            if (!autoBid.bidder.isActive()
+                    || autoBid.maxBid.compareTo(minimumNext) < 0) {
+                autoBids.remove(autoBid);
+                continue;
+            }
+
+            return autoBid;
+        }
+
+        return null;
+    }
+
+    private boolean isLeader(Bidder bidder) {
+        return highestBid != null
+                && highestBid.getBidder().getId().equals(bidder.getId());
+    }
+
+    private AutoBid findAutoBid(String bidderId) {
+        for (AutoBid autoBid : autoBids) {
+            if (autoBid.bidder.getId().equals(bidderId)) {
+                return autoBid;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean removeAutoBidOf(String bidderId) {
+        AutoBid existing = findAutoBid(bidderId);
+        return existing != null && autoBids.remove(existing);
+    }
+
+    /*
+     * Một cấu hình đấu giá tự động.
+     * implements Comparable để PriorityQueue tự sắp xếp: giá tối đa cao hơn đứng
+     * trước; bằng nhau thì sequence nhỏ hơn (đăng ký sớm hơn) đứng trước.
+     * Serializable để lưu cùng phiên ra file.
+     */
+    private static final class AutoBid
+            implements Comparable<AutoBid>, Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final Bidder bidder;
+        private final BigDecimal maxBid;
+        private final BigDecimal increment;
+        private final long sequence;
+
+        private AutoBid(
+                Bidder bidder,
+                BigDecimal maxBid,
+                BigDecimal increment,
+                long sequence) {
+            this.bidder = bidder;
+            this.maxBid = maxBid;
+            this.increment = increment;
+            this.sequence = sequence;
+        }
+
+        // Bước tự động thực tế: không nhỏ hơn bước giá của phiên.
+        private BigDecimal step(BigDecimal minimumIncrement) {
+            return increment.max(minimumIncrement);
+        }
+
+        @Override
+        public int compareTo(AutoBid other) {
+            int byMax = other.maxBid.compareTo(this.maxBid);
+            return byMax != 0 ? byMax : Long.compare(this.sequence, other.sequence);
+        }
+    }
+
+    // Gửi onNewBid cho từng lượt mới, ngoài vùng khóa.
+    private void notifyNewBids(List<AuctionObserver> listeners, List<Bid> newBids) {
+        for (Bid bid : newBids) {
+            notifyObservers(listeners, observer -> observer.onNewBid(this, bid));
+        }
     }
 
     public void addObserver(AuctionObserver observer) {
@@ -605,8 +910,35 @@ public class Auction implements Serializable {
         return startTime;
     }
 
+    // Có khóa vì Anti-sniping có thể đổi endTime trong lúc luồng khác đang đọc.
     public LocalDateTime getEndTime() {
-        return endTime;
+        bidLock.lock();
+
+        try {
+            return endTime;
+        } finally {
+            bidLock.unlock();
+        }
+    }
+
+    public boolean isAntiSnipingEnabled() {
+        bidLock.lock();
+
+        try {
+            return antiSnipingEnabled;
+        } finally {
+            bidLock.unlock();
+        }
+    }
+
+    public void setAntiSnipingEnabled(boolean enabled) {
+        bidLock.lock();
+
+        try {
+            antiSnipingEnabled = enabled;
+        } finally {
+            bidLock.unlock();
+        }
     }
 
     public BigDecimal getCurrentPrice() {
