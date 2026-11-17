@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="client.controller.SellerDashboardController" styleClass="page">
+    <top>
+        <HBox styleClass="topbar" spacing="10" alignment="CENTER_LEFT">
+            <Button text="← Danh sách" onAction="#back"/>
+            <Label text="Quản lý sản phẩm" styleClass="brand"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="balanceLabel" styleClass="balance-label"/>
+        </HBox>
+    </top>
+    <center>
+        <HBox spacing="14">
+            <padding><Insets top="14" right="16" bottom="14" left="16"/></padding>
+            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                <Label text="Sản phẩm của tôi" styleClass="section-title"/>
+                <TableView fx:id="itemTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="itemNameColumn" text="Tên" prefWidth="210"/>
+                        <TableColumn fx:id="itemCategoryColumn" text="Loại" prefWidth="90"/>
+                        <TableColumn fx:id="itemPriceColumn" text="Giá khởi điểm" prefWidth="130"/>
+                        <TableColumn fx:id="itemStatusColumn" text="Trạng thái" prefWidth="110"/>
+                    </columns>
+                    <placeholder><Label text="Chưa có sản phẩm. Thêm ở khung bên phải."/></placeholder>
+                </TableView>
+                <Label text="Phiên của tôi" styleClass="section-title"/>
+                <TableView fx:id="auctionTable" prefHeight="200">
+                    <columns>
+                        <TableColumn fx:id="auctionNameColumn" text="Sản phẩm" prefWidth="210"/>
+                        <TableColumn fx:id="auctionPriceColumn" text="Giá hiện tại" prefWidth="130"/>
+                        <TableColumn fx:id="auctionStatusColumn" text="Trạng thái" prefWidth="110"/>
+                        <TableColumn fx:id="auctionEndColumn" text="Kết thúc" prefWidth="120"/>
+                    </columns>
+                    <placeholder><Label text="Chưa có phiên nào"/></placeholder>
+                </TableView>
+                <HBox spacing="8">
+                    <Button fx:id="viewAuctionButton" text="Xem phiên" onAction="#viewAuction"/>
+                    <Button fx:id="cancelAuctionButton" text="Hủy phiên" styleClass="danger" onAction="#cancelAuction"/>
+                </HBox>
+            </VBox>
+            <ScrollPane fitToWidth="true" prefWidth="360" minWidth="320" styleClass="side-scroll">
+                <VBox spacing="12">
+                    <VBox styleClass="card" spacing="8">
+                        <padding><Insets top="14" right="16" bottom="14" left="16"/></padding>
+                        <Label fx:id="formTitle" text="Thêm sản phẩm" styleClass="section-title"/>
+                        <Label text="Loại"/>
+                        <ComboBox fx:id="categoryBox" maxWidth="Infinity"/>
+                        <Label text="Tên sản phẩm"/>
+                        <TextField fx:id="nameField"/>
+                        <Label text="Giá khởi điểm (đ)"/>
+                        <TextField fx:id="priceField"/>
+                        <Label text="Mô tả"/>
+                        <TextArea fx:id="descriptionArea" prefRowCount="3" wrapText="true"/>
+                        <HBox spacing="8">
+                            <Button fx:id="saveButton" text="Thêm" styleClass="primary" onAction="#saveItem"/>
+                            <Button fx:id="deleteButton" text="Xóa" styleClass="danger" onAction="#deleteItem"/>
+                            <Button text="Làm mới form" onAction="#clearForm"/>
+                        </HBox>
+                    </VBox>
+                    <VBox fx:id="auctionForm" styleClass="card" spacing="8">
+                        <padding><Insets top="14" right="16" bottom="14" left="16"/></padding>
+                        <Label text="Tạo phiên cho sản phẩm đã chọn" styleClass="section-title"/>
+                        <Label text="Bước giá (đ)"/>
+                        <TextField fx:id="incrementField"/>
+                        <Label text="Bắt đầu sau (phút, 0 = ngay)"/>
+                        <TextField fx:id="startDelayField" text="0"/>
+                        <Label text="Thời lượng (phút)"/>
+                        <TextField fx:id="durationField" text="10"/>
+                        <CheckBox fx:id="antiSnipingBox" text="Chống bid phút chót (gia hạn 30 giây)"/>
+                        <Separator/>
+                        <Button fx:id="createAuctionButton" text="Tạo phiên" styleClass="primary"
+                                maxWidth="Infinity" onAction="#createAuction"/>
+                    </VBox>
+                    <Label fx:id="messageLabel" styleClass="message" wrapText="true"/>
+                </VBox>
+            </ScrollPane>
+        </HBox>
+    </center>
+</BorderPane>

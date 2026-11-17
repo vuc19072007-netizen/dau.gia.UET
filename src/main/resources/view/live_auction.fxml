@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="client.controller.LiveAuctionController" styleClass="page">
+    <top>
+        <HBox styleClass="topbar" spacing="10" alignment="CENTER_LEFT">
+            <Button text="← Danh sách" onAction="#back"/>
+            <Label fx:id="titleLabel" styleClass="brand"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="balanceLabel" styleClass="balance-label"/>
+        </HBox>
+    </top>
+    <center>
+        <HBox spacing="14">
+            <padding><Insets top="14" right="16" bottom="14" left="16"/></padding>
+            <ScrollPane fitToWidth="true" prefWidth="380" minWidth="340" styleClass="side-scroll">
+                <VBox spacing="12">
+                    <VBox styleClass="card" spacing="6">
+                        <padding><Insets top="14" right="16" bottom="14" left="16"/></padding>
+                        <Label fx:id="categoryLabel" styleClass="badge"/>
+                        <Label fx:id="detailsLabel" styleClass="hint" wrapText="true"/>
+                        <Label fx:id="descriptionLabel" wrapText="true"/>
+                        <Label fx:id="sellerLabel" styleClass="hint"/>
+                        <Label fx:id="timeLabel" styleClass="hint" wrapText="true"/>
+                    </VBox>
+                    <VBox styleClass="card" spacing="6">
+                        <padding><Insets top="14" right="16" bottom="14" left="16"/></padding>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <Label fx:id="statusLabel" styleClass="status-pill"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="countdownLabel" styleClass="countdown"/>
+                        </HBox>
+                        <Label text="Giá hiện tại" styleClass="hint"/>
+                        <Label fx:id="priceLabel" styleClass="price"/>
+                        <Label fx:id="leaderLabel"/>
+                        <Label fx:id="minimumLabel" styleClass="hint"/>
+                        <Label fx:id="antiSnipingLabel" styleClass="hint" wrapText="true"/>
+                    </VBox>
+                    <VBox fx:id="bidBox" styleClass="card" spacing="8">
+                        <padding><Insets top="14" right="16" bottom="14" left="16"/></padding>
+                        <Label text="Đặt giá" styleClass="section-title"/>
+                        <HBox spacing="8">
+                            <TextField fx:id="amountField" HBox.hgrow="ALWAYS" onAction="#placeBid"/>
+                            <Button fx:id="bidButton" text="Đặt giá" styleClass="primary" onAction="#placeBid"/>
+                        </HBox>
+                        <Separator/>
+                        <Label text="Đấu giá tự động" styleClass="section-title"/>
+                        <Label text="Hệ thống tự trả giá thay bạn mỗi khi bị vượt, không quá giá tối đa."
+                               styleClass="hint" wrapText="true"/>
+                        <HBox spacing="8">
+                            <TextField fx:id="autoMaxField" promptText="Giá tối đa" HBox.hgrow="ALWAYS"/>
+                            <TextField fx:id="autoStepField" promptText="Bước" prefWidth="110"/>
+                        </HBox>
+                        <HBox spacing="8">
+                            <Button fx:id="autoOnButton" text="Bật tự động" onAction="#enableAutoBid"/>
+                            <Button fx:id="autoOffButton" text="Tắt" onAction="#disableAutoBid"/>
+                            <Label fx:id="autoStatusLabel" styleClass="hint" wrapText="true"/>
+                        </HBox>
+                    </VBox>
+                    <HBox spacing="8">
+                        <Button fx:id="payButton" text="Thanh toán" styleClass="primary" onAction="#pay"/>
+                        <Button fx:id="cancelButton" text="Hủy phiên" styleClass="danger" onAction="#cancelAuction"/>
+                    </HBox>
+                    <Label fx:id="messageLabel" styleClass="message" wrapText="true"/>
+                </VBox>
+            </ScrollPane>
+            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                <Label text="Diễn biến giá" styleClass="section-title"/>
+                <LineChart fx:id="priceChart" legendVisible="false" createSymbols="true"
+                           animated="false" VBox.vgrow="ALWAYS" minHeight="220">
+                    <xAxis><CategoryAxis label="Thời điểm"/></xAxis>
+                    <yAxis><NumberAxis label="Giá (đ)" forceZeroInRange="false"/></yAxis>
+                </LineChart>
+                <Label text="Lịch sử đặt giá" styleClass="section-title"/>
+                <TableView fx:id="historyTable" prefHeight="220">
+                    <columns>
+                        <TableColumn fx:id="historyTimeColumn" text="Thời điểm" prefWidth="140"/>
+                        <TableColumn fx:id="historyBidderColumn" text="Người đặt" prefWidth="180"/>
+                        <TableColumn fx:id="historyAmountColumn" text="Số tiền" prefWidth="160"/>
+                    </columns>
+                    <placeholder><Label text="Chưa có lượt đặt giá"/></placeholder>
+                </TableView>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>

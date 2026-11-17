@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="client.controller.AuctionListController" styleClass="page">
+    <top>
+        <HBox styleClass="topbar" spacing="10" alignment="CENTER_LEFT">
+            <Label text="Đấu giá UET" styleClass="brand"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="userLabel" styleClass="user-label"/>
+            <Label fx:id="balanceLabel" styleClass="balance-label"/>
+            <Button fx:id="depositButton" text="Nạp tiền" onAction="#deposit"/>
+            <Button fx:id="sellerButton" text="Quản lý sản phẩm" onAction="#openSeller"/>
+            <Button fx:id="adminButton" text="Quản trị" onAction="#openAdmin"/>
+            <Button text="Đăng xuất" onAction="#logout"/>
+        </HBox>
+    </top>
+    <center>
+        <VBox spacing="10">
+            <padding><Insets top="14" right="16" bottom="14" left="16"/></padding>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Phiên đấu giá" styleClass="section-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="searchField" promptText="Tìm theo tên sản phẩm" prefWidth="240"/>
+                <ComboBox fx:id="categoryBox" prefWidth="150"/>
+                <ComboBox fx:id="statusBox" prefWidth="150"/>
+                <Button text="Tải lại" onAction="#reload"/>
+            </HBox>
+            <TableView fx:id="auctionTable" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="nameColumn" text="Sản phẩm" prefWidth="230"/>
+                    <TableColumn fx:id="categoryColumn" text="Loại" prefWidth="90"/>
+                    <TableColumn fx:id="priceColumn" text="Giá hiện tại" prefWidth="130"/>
+                    <TableColumn fx:id="leaderColumn" text="Dẫn đầu" prefWidth="130"/>
+                    <TableColumn fx:id="statusColumn" text="Trạng thái" prefWidth="110"/>
+                    <TableColumn fx:id="endColumn" text="Kết thúc" prefWidth="120"/>
+                    <TableColumn fx:id="sellerColumn" text="Người bán" prefWidth="150"/>
+                </columns>
+                <placeholder><Label text="Chưa có phiên đấu giá nào"/></placeholder>
+            </TableView>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button fx:id="openButton" text="Xem phiên" styleClass="primary" onAction="#openSelected"/>
+                <Label fx:id="messageLabel" styleClass="message" wrapText="true"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

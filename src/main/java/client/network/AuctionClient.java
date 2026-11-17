@@ -50,6 +50,8 @@ public class AuctionClient {
 
     // Tài khoản đang đăng nhập (không có mật khẩu).
     private volatile UserDTO currentUser;
+    // Gọi khi kết nối bị đóng (server tắt, mất mạng, hoặc chính client ngắt).
+    private volatile Runnable onDisconnected;
 
     public AuctionClient(String host, int port) {
         this.host = host;
@@ -392,6 +394,15 @@ public class AuctionClient {
         }
 
         LOGGER.info("AuctionClient đã ngắt kết nối an toàn.");
+
+        Runnable callback = onDisconnected;
+        if (callback != null) {
+            callback.run();
+        }
+    }
+
+    public void setOnDisconnected(Runnable onDisconnected) {
+        this.onDisconnected = onDisconnected;
     }
 
     public boolean isConnected() {

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="client.controller.RegisterController" styleClass="page">
+    <VBox styleClass="card" maxWidth="400" maxHeight="-Infinity" spacing="10">
+        <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
+        <Label text="Tạo tài khoản" styleClass="title"/>
+        <Label text="Họ tên"/>
+        <TextField fx:id="nameField"/>
+        <Label text="Số điện thoại"/>
+        <TextField fx:id="phoneField" promptText="10 chữ số"/>
+        <Label text="Mật khẩu"/>
+        <PasswordField fx:id="passwordField" promptText="8–15 ký tự"/>
+        <Label text="Nhập lại mật khẩu"/>
+        <PasswordField fx:id="confirmField"/>
+        <Label text="Địa chỉ"/>
+        <TextField fx:id="addressField"/>
+        <Label text="Vai trò"/>
+        <ComboBox fx:id="roleBox" maxWidth="Infinity"/>
+        <Button fx:id="registerButton" text="Đăng ký" defaultButton="true" maxWidth="Infinity"
+                styleClass="primary" onAction="#register"/>
+        <Label fx:id="messageLabel" wrapText="true" styleClass="message"/>
+        <Hyperlink text="Đã có tài khoản? Đăng nhập" onAction="#backToLogin"/>
+    </VBox>
+</StackPane>

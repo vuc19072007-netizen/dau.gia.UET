@@ -1,12 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.VBox?>
+
 <?import javafx.geometry.Insets?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="12">
- <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
- <Label text="ĐĂNG NHẬP"/>
- <TextField fx:id="phoneField" promptText="Số điện thoại"/>
- <PasswordField fx:id="passwordField" promptText="Mật khẩu"/>
- <Button text="Đăng nhập" onAction="#login"/>
- <Label fx:id="message"/>
-</VBox>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="client.controller.LoginController" styleClass="page">
+    <VBox styleClass="card" maxWidth="380" maxHeight="-Infinity" spacing="12">
+        <padding><Insets top="28" right="28" bottom="28" left="28"/></padding>
+        <Label text="Đấu giá UET" styleClass="title"/>
+        <Label text="Đăng nhập để tham gia đấu giá" styleClass="subtitle"/>
+        <Label text="Số điện thoại"/>
+        <TextField fx:id="phoneField" promptText="10 chữ số" onAction="#login"/>
+        <Label text="Mật khẩu"/>
+        <PasswordField fx:id="passwordField" promptText="8–15 ký tự" onAction="#login"/>
+        <Button fx:id="loginButton" text="Đăng nhập" defaultButton="true" maxWidth="Infinity"
+                styleClass="primary" onAction="#login"/>
+        <Label fx:id="messageLabel" wrapText="true" styleClass="message"/>
+        <Hyperlink text="Chưa có tài khoản? Đăng ký" onAction="#openRegister"/>
+        <Label fx:id="serverLabel" styleClass="hint"/>
+    </VBox>
+</StackPane>
