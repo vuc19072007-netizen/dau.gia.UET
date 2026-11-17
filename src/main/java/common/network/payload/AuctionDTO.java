@@ -3,6 +3,8 @@ package common.network.payload;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import model.auction.Auction;
 import model.auction.AuctionStatus;
@@ -31,6 +33,12 @@ public class AuctionDTO implements Serializable {
     private String highestBidderId;
     private String highestBidderName;
     private int bidCount;
+    private boolean antiSnipingEnabled;
+    // Chỉ điền khi client xin chi tiết một phiên (GET_AUCTION_DETAIL_REQUEST).
+    private List<BidDTO> bidHistory = new ArrayList<>();
+    // Hạn mức auto-bid của chính người đang xem, null nếu chưa bật.
+    private BigDecimal myAutoBidMax;
+    private String itemDetails;
 
     public AuctionDTO() {
     }
@@ -70,7 +78,60 @@ public class AuctionDTO implements Serializable {
             dto.setBidCount(auction.getBidHistory().size());
         }
 
+        dto.antiSnipingEnabled = auction.isAntiSnipingEnabled();
         return dto;
+    }
+
+    /*
+     * Bản đầy đủ cho màn hình đấu giá trực tiếp: thêm lịch sử đặt giá,
+     * thuộc tính riêng của sản phẩm và hạn mức auto-bid của người xem.
+     */
+    public static AuctionDTO detailOf(Auction auction, String viewerId) {
+        AuctionDTO dto = fromAuction(auction);
+
+        if (dto == null) {
+            return null;
+        }
+
+        List<BidDTO> history = new ArrayList<>();
+
+        for (Bid bid : auction.getBidHistory()) {
+            history.add(BidDTO.fromBid(bid));
+        }
+
+        dto.bidHistory = history;
+        dto.itemDetails = ItemDTO.fromItem(auction.getItem()).getDetails();
+
+        if (viewerId != null) {
+            dto.myAutoBidMax = auction.getAutoBidMax(viewerId);
+        }
+
+        return dto;
+    }
+
+    // Giá tối thiểu cho lượt đặt tiếp theo: giá hiện tại + bước giá.
+    public BigDecimal getMinimumNextBid() {
+        if (currentPrice == null || minimumIncrement == null) {
+            return null;
+        }
+
+        return currentPrice.add(minimumIncrement);
+    }
+
+    public boolean isAntiSnipingEnabled() {
+        return antiSnipingEnabled;
+    }
+
+    public List<BidDTO> getBidHistory() {
+        return bidHistory;
+    }
+
+    public BigDecimal getMyAutoBidMax() {
+        return myAutoBidMax;
+    }
+
+    public String getItemDetails() {
+        return itemDetails;
     }
 
     public String getAuctionId() {

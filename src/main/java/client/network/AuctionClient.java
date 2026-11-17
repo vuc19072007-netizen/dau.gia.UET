@@ -19,7 +19,6 @@ import java.util.logging.Logger;
 import common.network.MessageType;
 import common.network.NetworkMessage;
 import common.network.payload.*;
-import model.user.User;
 
 /**
  * Socket Client kết nối với AuctionServer.
@@ -49,7 +48,8 @@ public class AuctionClient {
     private final List<AuctionEventListener> listeners = new CopyOnWriteArrayList<>();
     private final Queue<CompletableFuture<NetworkMessage>> pendingResponseQueue = new ConcurrentLinkedQueue<>();
 
-    private User currentUser;
+    // Tài khoản đang đăng nhập (không có mật khẩu).
+    private volatile UserDTO currentUser;
 
     public AuctionClient(String host, int port) {
         this.host = host;
@@ -124,6 +124,9 @@ public class AuctionClient {
                 } else if (type == MessageType.AUCTION_CLOSED_NOTIFICATION
                         && payload instanceof AuctionClosedNotificationPayload closedPayload) {
                     listener.onAuctionClosed(closedPayload);
+                } else if (type == MessageType.AUCTION_UPDATED_NOTIFICATION
+                        && payload instanceof AuctionDTO auctionPayload) {
+                    listener.onAuctionUpdated(auctionPayload);
                 }
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Lỗi xử lý sự kiện broadcast trong listener", e);
@@ -168,17 +171,22 @@ public class AuctionClient {
      * Đăng nhập vào hệ thống.
      */
     public boolean login(String phoneNumber, String password) throws Exception {
+        return loginRequest(phoneNumber, password).isSuccess();
+    }
+
+    /**
+     * Đăng nhập và trả nguyên phản hồi, để giao diện hiển thị lý do khi thất bại
+     * (sai mật khẩu, tài khoản bị khóa...).
+     */
+    public NetworkMessage loginRequest(String phoneNumber, String password) throws Exception {
         LoginRequestPayload payload = new LoginRequestPayload(phoneNumber, password);
         NetworkMessage req = NetworkMessage.createRequest(MessageType.LOGIN_REQUEST, payload);
         NetworkMessage res = sendRequest(req);
 
-        if (res.isSuccess()) {
-            if (res.getPayload() instanceof User user) {
-                this.currentUser = user;
-            }
-            return true;
+        if (res.isSuccess() && res.getPayload() instanceof UserDTO user) {
+            this.currentUser = user;
         }
-        return false;
+        return res;
     }
 
     /**
@@ -250,6 +258,96 @@ public class AuctionClient {
         return sendRequest(req);
     }
 
+    /**
+     * Lấy chi tiết một phiên kèm lịch sử đặt giá.
+     */
+    public NetworkMessage getAuctionDetail(String auctionId) throws Exception {
+        return request(MessageType.GET_AUCTION_DETAIL_REQUEST, auctionId);
+    }
+
+    /**
+     * Lấy lại thông tin tài khoản (số dư mới nhất) và cập nhật currentUser.
+     */
+    public NetworkMessage refreshProfile() throws Exception {
+        return updateUserFrom(request(MessageType.GET_PROFILE_REQUEST, null));
+    }
+
+    /**
+     * Nạp tiền vào ví (Bidder).
+     */
+    public NetworkMessage deposit(BigDecimal amount) throws Exception {
+        return updateUserFrom(request(MessageType.DEPOSIT_REQUEST, amount));
+    }
+
+    /**
+     * Bật hoặc thay cấu hình đấu giá tự động.
+     */
+    public NetworkMessage setAutoBid(String auctionId, BigDecimal maxBid, BigDecimal increment) throws Exception {
+        return request(MessageType.SET_AUTO_BID_REQUEST, new AutoBidRequestPayload(auctionId, maxBid, increment));
+    }
+
+    public NetworkMessage cancelAutoBid(String auctionId) throws Exception {
+        return request(MessageType.CANCEL_AUTO_BID_REQUEST, auctionId);
+    }
+
+    /**
+     * Danh sách sản phẩm của Seller đang đăng nhập.
+     */
+    @SuppressWarnings("unchecked")
+    public List<ItemDTO> getMyItems() throws Exception {
+        NetworkMessage res = request(MessageType.GET_MY_ITEMS_REQUEST, null);
+        failIfError(res);
+        return (List<ItemDTO>) res.getPayload();
+    }
+
+    public NetworkMessage addItem(ItemRequestPayload item) throws Exception {
+        return request(MessageType.ADD_ITEM_REQUEST, item);
+    }
+
+    public NetworkMessage updateItem(ItemRequestPayload item) throws Exception {
+        return request(MessageType.UPDATE_ITEM_REQUEST, item);
+    }
+
+    public NetworkMessage deleteItem(String itemId) throws Exception {
+        return request(MessageType.DELETE_ITEM_REQUEST, itemId);
+    }
+
+    /**
+     * Danh sách mọi tài khoản (Admin).
+     */
+    @SuppressWarnings("unchecked")
+    public List<UserDTO> getUsers() throws Exception {
+        NetworkMessage res = request(MessageType.GET_USERS_REQUEST, null);
+        failIfError(res);
+        return (List<UserDTO>) res.getPayload();
+    }
+
+    public NetworkMessage banUser(String userId) throws Exception {
+        return request(MessageType.BAN_USER_REQUEST, userId);
+    }
+
+    public NetworkMessage unbanUser(String userId) throws Exception {
+        return request(MessageType.UNBAN_USER_REQUEST, userId);
+    }
+
+    private NetworkMessage request(MessageType type, Object payload) throws Exception {
+        return sendRequest(NetworkMessage.createRequest(type, payload));
+    }
+
+    private NetworkMessage updateUserFrom(NetworkMessage res) {
+        if (res.isSuccess() && res.getPayload() instanceof UserDTO user) {
+            this.currentUser = user;
+        }
+        return res;
+    }
+
+    // Phản hồi lỗi thì ném ngoại lệ mang đúng câu báo lỗi của server.
+    private static void failIfError(NetworkMessage res) {
+        if (!res.isSuccess()) {
+            throw new IllegalStateException(res.getErrorMessage());
+        }
+    }
+
     // ==========================================
     // Quản lý Listener và Đóng kết nối
     // ==========================================
@@ -300,7 +398,7 @@ public class AuctionClient {
         return connected && socket != null && !socket.isClosed();
     }
 
-    public User getCurrentUser() {
+    public UserDTO getCurrentUser() {
         return currentUser;
     }
 }

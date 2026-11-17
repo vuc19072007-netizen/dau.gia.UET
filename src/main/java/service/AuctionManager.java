@@ -96,8 +96,9 @@ public final class AuctionManager {
      * Nên gọi lúc tắt server hoặc lúc hệ thống đang rảnh: ví của từng Bidder và
      * từng phiên được khóa riêng, nên nếu có lượt đặt giá chạy đúng lúc đang ghi
      * thì ví và phiên trong file có thể lệch nhau một lượt.
-     * Giới hạn: DataStore hiện chỉ lưu người dùng và phiên. Sản phẩm đã từng lên
-     * phiên được lưu kèm trong phiên; sản phẩm CHƯA có phiên nào thì không được lưu.
+     * Lưu cả kho sản phẩm, để sản phẩm chưa lên phiên nào không bị mất.
+     * Ba danh sách nằm trong MỘT lần ghi nên một sản phẩm vừa ở kho vừa ở phiên
+     * vẫn là cùng một đối tượng sau khi tải lại.
      */
     public synchronized void saveTo(DataStore store) {
         if (store == null) {
@@ -105,14 +106,14 @@ public final class AuctionManager {
                     "Thiếu nơi lưu dữ liệu");
         }
 
-        store.save(List.copyOf(users), List.copyOf(auctions));
+        store.save(List.copyOf(users), List.copyOf(auctions), List.copyOf(items));
     }
 
     /*
      * Thay toàn bộ dữ liệu đang có bằng dữ liệu trong file.
      * Trả về false nếu file chưa tồn tại (lần chạy đầu tiên); khi đó dữ liệu
      * hiện tại được giữ nguyên.
-     * Kho sản phẩm được dựng lại từ các phiên, vì file không lưu riêng sản phẩm.
+     * Kho sản phẩm lấy từ file; file của bản cũ không có kho thì dựng lại từ các phiên.
      * Sau khi tải, danh sách observer của mọi phiên đều rỗng (xem Auction):
      * Server 2 và giao diện phải đăng ký lại bằng addObserver().
      * Gọi hàm này TRƯỚC khi mở server để chưa có client nào giữ đối tượng cũ.
@@ -135,6 +136,7 @@ public final class AuctionManager {
 
         users.addAll(state.getUsers());
         auctions.addAll(state.getAuctions());
+        items.addAll(state.getItems());
 
         for (Auction auction : auctions) {
             Item item = auction.getItem();

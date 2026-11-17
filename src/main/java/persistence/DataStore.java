@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.auction.Auction;
+import model.item.Item;
 import model.user.User;
 
 /**
@@ -48,7 +49,16 @@ public final class DataStore {
      * @param auctions danh sách phiên đấu giá
      */
     public void save(List<User> users, List<Auction> auctions) {
-        SystemState state = new SystemState(users, auctions);
+        save(users, auctions, List.of());
+    }
+
+    /**
+     * Lưu toàn bộ trạng thái, kể cả kho sản phẩm của người bán.
+     * Sản phẩm chưa từng lên phiên chỉ nằm trong danh sách items, nên nếu không
+     * lưu riêng thì chúng mất khi khởi động lại.
+     */
+    public void save(List<User> users, List<Auction> auctions, List<Item> items) {
+        SystemState state = new SystemState(users, auctions, items);
         try (ObjectOutputStream out = new ObjectOutputStream(
                 Files.newOutputStream(file))) {
             out.writeObject(state);
@@ -95,12 +105,24 @@ public final class DataStore {
 
         private final List<User> users;
         private final List<Auction> auctions;
+        // File lưu bởi bản cũ không có trường này: đọc lên sẽ là null.
+        private final List<Item> items;
 
         public SystemState(List<User> users, List<Auction> auctions) {
+            this(users, auctions, List.of());
+        }
+
+        public SystemState(List<User> users, List<Auction> auctions, List<Item> items) {
             this.users = new ArrayList<>(
                     users == null ? List.of() : users);
             this.auctions = new ArrayList<>(
                     auctions == null ? List.of() : auctions);
+            this.items = new ArrayList<>(
+                    items == null ? List.of() : items);
+        }
+
+        public List<Item> getItems() {
+            return items == null ? List.of() : items;
         }
 
         public List<User> getUsers() {

@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import common.network.MessageType;
 import common.network.NetworkMessage;
 import common.network.payload.AuctionClosedNotificationPayload;
+import common.network.payload.AuctionDTO;
 import common.network.payload.BidNotificationPayload;
 import model.auction.Auction;
 import model.auction.AuctionObserver;
@@ -53,6 +54,8 @@ public class AuctionNetworkBroadcaster implements AuctionObserver {
                     bid.getCreatedAt() != null ? bid.getCreatedAt() : LocalDateTime.now()
             );
 
+            // Anti-sniping có thể vừa gia hạn phiên: gửi kèm giờ kết thúc mới.
+            payload.setEndTime(auction.getEndTime());
             NetworkMessage message = NetworkMessage.createBroadcast(
                     MessageType.NEW_BID_NOTIFICATION,
                     payload
@@ -86,6 +89,16 @@ public class AuctionNetworkBroadcaster implements AuctionObserver {
                 oldStatus,
                 newStatus
         ));
+
+        // Mọi lần đổi trạng thái đều gửi bản AuctionDTO mới để danh sách phiên trên
+        // các client cập nhật (ví dụ phiên chuyển OPEN -> RUNNING khi tới giờ).
+        try {
+            server.broadcast(NetworkMessage.createBroadcast(
+                    MessageType.AUCTION_UPDATED_NOTIFICATION,
+                    AuctionDTO.fromAuction(auction)));
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Lỗi khi broadcast trạng thái phiên", e);
+        }
 
         // Nếu phiên kết thúc hoặc bị hủy, thông báo đóng phiên tới toàn bộ Client
         if (newStatus == AuctionStatus.CANCELED) {

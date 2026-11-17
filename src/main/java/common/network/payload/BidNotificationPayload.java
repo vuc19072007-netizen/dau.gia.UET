@@ -17,6 +17,9 @@ public class BidNotificationPayload implements Serializable {
     private BigDecimal amount;
     private BigDecimal newCurrentPrice;
     private LocalDateTime timestamp;
+    // Giờ kết thúc sau lượt đặt này. Anti-sniping có thể đã gia hạn nên client
+    // phải cập nhật đồng hồ đếm ngược theo giá trị này.
+    private LocalDateTime endTime;
 
     public BidNotificationPayload() {
     }
@@ -36,6 +39,14 @@ public class BidNotificationPayload implements Serializable {
         this.amount = amount;
         this.newCurrentPrice = newCurrentPrice;
         this.timestamp = timestamp;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
     public String getAuctionId() {

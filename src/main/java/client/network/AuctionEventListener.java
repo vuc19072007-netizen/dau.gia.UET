@@ -1,6 +1,7 @@
 package client.network;
 
 import common.network.payload.AuctionClosedNotificationPayload;
+import common.network.payload.AuctionDTO;
 import common.network.payload.BidNotificationPayload;
 
 /**
@@ -18,5 +19,12 @@ public interface AuctionEventListener {
      * Kích hoạt khi một phiên đấu giá kết thúc hoặc bị đóng/hủy.
      */
     void onAuctionClosed(AuctionClosedNotificationPayload closedNotification);
+
+    /**
+     * Kích hoạt khi một phiên vừa được tạo hoặc đổi trạng thái.
+     * default: lớp nào không quan tâm thì không cần viết hàm này.
+     */
+    default void onAuctionUpdated(AuctionDTO auction) {
+    }
 }
 

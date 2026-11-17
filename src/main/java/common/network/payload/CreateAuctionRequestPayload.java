@@ -18,6 +18,11 @@ public class CreateAuctionRequestPayload implements Serializable {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String sellerId;
+    // Tạo phiên cho sản phẩm có sẵn trong kho của Seller (đã thêm bằng ADD_ITEM).
+    // null thì server tạo sản phẩm mới từ itemName/itemCategory/startingPrice.
+    private String itemId;
+    // Bật chống bid phút chót cho phiên này.
+    private boolean antiSnipingEnabled;
 
     public CreateAuctionRequestPayload() {
     }
@@ -39,6 +44,22 @@ public class CreateAuctionRequestPayload implements Serializable {
         this.startTime = startTime;
         this.endTime = endTime;
         this.sellerId = sellerId;
+    }
+
+    public String getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(String itemId) {
+        this.itemId = itemId;
+    }
+
+    public boolean isAntiSnipingEnabled() {
+        return antiSnipingEnabled;
+    }
+
+    public void setAntiSnipingEnabled(boolean antiSnipingEnabled) {
+        this.antiSnipingEnabled = antiSnipingEnabled;
     }
 
     public String getItemName() {

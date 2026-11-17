@@ -63,6 +63,69 @@ public enum MessageType {
      */
     CANCEL_AUCTION_REQUEST(Category.REQUEST),
 
+    /**
+     * Lấy chi tiết một phiên kèm lịch sử đặt giá (màn hình đấu giá trực tiếp).
+     * Payload: String auctionId. Phản hồi: AuctionDTO đầy đủ.
+     */
+    GET_AUCTION_DETAIL_REQUEST(Category.REQUEST),
+
+    /**
+     * Lấy lại thông tin tài khoản đang đăng nhập (số dư mới nhất).
+     * Payload: null. Phản hồi: UserDTO.
+     */
+    GET_PROFILE_REQUEST(Category.REQUEST),
+
+    /**
+     * Nạp tiền vào ví (Bidder). Payload: BigDecimal. Phản hồi: UserDTO.
+     */
+    DEPOSIT_REQUEST(Category.REQUEST),
+
+    /**
+     * Bật hoặc thay cấu hình đấu giá tự động (Bidder).
+     * Payload: AutoBidRequestPayload.
+     */
+    SET_AUTO_BID_REQUEST(Category.REQUEST),
+
+    /**
+     * Tắt đấu giá tự động trong một phiên. Payload: String auctionId.
+     */
+    CANCEL_AUTO_BID_REQUEST(Category.REQUEST),
+
+    /**
+     * Danh sách sản phẩm của Seller đang đăng nhập. Phản hồi: List&lt;ItemDTO&gt;.
+     */
+    GET_MY_ITEMS_REQUEST(Category.REQUEST),
+
+    /**
+     * Thêm sản phẩm (Seller). Payload: ItemRequestPayload. Phản hồi: ItemDTO.
+     */
+    ADD_ITEM_REQUEST(Category.REQUEST),
+
+    /**
+     * Sửa sản phẩm (Seller, chỉ chủ sở hữu). Payload: ItemRequestPayload.
+     */
+    UPDATE_ITEM_REQUEST(Category.REQUEST),
+
+    /**
+     * Xóa sản phẩm (Seller, chỉ chủ sở hữu). Payload: String itemId.
+     */
+    DELETE_ITEM_REQUEST(Category.REQUEST),
+
+    /**
+     * Danh sách mọi tài khoản (Admin). Phản hồi: List&lt;UserDTO&gt;.
+     */
+    GET_USERS_REQUEST(Category.REQUEST),
+
+    /**
+     * Khóa tài khoản (Admin). Payload: String userId.
+     */
+    BAN_USER_REQUEST(Category.REQUEST),
+
+    /**
+     * Mở khóa tài khoản (Admin). Payload: String userId.
+     */
+    UNBAN_USER_REQUEST(Category.REQUEST),
+
     // ==========================================
     // 2. NHÓM RESPONSE (Server trả riêng cho 1 Client)
     // ==========================================
@@ -102,7 +165,14 @@ public enum MessageType {
      * Thông báo thời gian thực khi một phiên đấu giá kết thúc hoặc bị đóng/hủy.
      * Payload: AuctionClosedNotificationPayload
      */
-    AUCTION_CLOSED_NOTIFICATION(Category.BROADCAST);
+    AUCTION_CLOSED_NOTIFICATION(Category.BROADCAST),
+
+    /**
+     * Thông báo một phiên vừa được tạo hoặc vừa đổi trạng thái
+     * (OPEN -> RUNNING -> FINISHED -> PAID/CANCELED), để danh sách phiên trên
+     * mọi client cập nhật ngay. Payload: AuctionDTO.
+     */
+    AUCTION_UPDATED_NOTIFICATION(Category.BROADCAST);
 
     private enum Category {
         REQUEST,
