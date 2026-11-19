@@ -1,0 +1,457 @@
+<mxfile host="Electron" type="device">
+  <diagram id="uml-core" name="So do lop - phan loi">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Serializable" value="«interface»&lt;br&gt;&lt;b&gt;Serializable&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(java.io)&lt;/font&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=62;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="-471" width="200" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="Entity" value="&lt;i&gt;&lt;b&gt;Entity&lt;/b&gt;&lt;/i&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1490" y="-471" width="238" height="211" as="geometry" />
+        </mxCell>
+        <mxCell id="Entity-s0" value="- id: String&lt;br&gt;- createdAt: LocalDateTime&lt;br&gt;- updatedAt: LocalDateTime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Entity">
+          <mxGeometry y="30" width="238" height="61" as="geometry" />
+        </mxCell>
+        <mxCell id="Entity-sep1" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="Entity">
+          <mxGeometry y="91" width="238" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="Entity-s1" value="# Entity()&lt;br&gt;# Entity(id: String)&lt;br&gt;+ getId(): String&lt;br&gt;+ getCreatedAt(): LocalDateTime&lt;br&gt;+ getUpdatedAt(): LocalDateTime&lt;br&gt;# markUpdated(): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Entity">
+          <mxGeometry y="99" width="238" height="112" as="geometry" />
+        </mxCell>
+        <mxCell id="AuctionManager" value="«Singleton»&lt;br&gt;&lt;b&gt;AuctionManager&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=46;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1988" y="-963" width="452" height="703" as="geometry" />
+        </mxCell>
+        <mxCell id="AuctionManager-s0" value="&lt;u&gt;- instance: AuctionManager&lt;/u&gt;&lt;br&gt;- auctions: List&amp;lt;Auction&amp;gt;&lt;br&gt;- users: List&amp;lt;User&amp;gt;&lt;br&gt;- items: List&amp;lt;Item&amp;gt;&lt;br&gt;- clock: ScheduledExecutorService" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="AuctionManager">
+          <mxGeometry y="46" width="452" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="AuctionManager-sep1" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="AuctionManager">
+          <mxGeometry y="141" width="452" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="AuctionManager-s1" value="- AuctionManager()&lt;br&gt;&lt;u&gt;+ getInstance(): AuctionManager&lt;/u&gt;&lt;br&gt;+ startClock(): void&lt;br&gt;+ stopClock(): void&lt;br&gt;+ updateAllAuctions(): void&lt;br&gt;+ reset(): void&lt;br&gt;+ saveTo(store: DataStore): void&lt;br&gt;+ loadFrom(store: DataStore): boolean&lt;br&gt;+ createAuction(item: Item, seller: Seller,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;minimumIncrement: BigDecimal, startTime: LocalDateTime,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;endTime: LocalDateTime): Auction&lt;br&gt;+ addAuction(auction: Auction): void&lt;br&gt;+ getAuction(auctionId: String): Auction&lt;br&gt;+ getAllAuction(): List&amp;lt;Auction&amp;gt;&lt;br&gt;+ addItem(seller: Seller, type: ItemType, name: String,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;startingPrice: BigDecimal): Item&lt;br&gt;+ getItem(itemId: String): Item&lt;br&gt;+ getItemsOf(sellerId: String): List&amp;lt;Item&amp;gt;&lt;br&gt;+ updateItem(actor: User, itemId: String, name: String,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;startingPrice: BigDecimal, description: String): void&lt;br&gt;+ removeItem(actor: User, itemId: String): void&lt;br&gt;+ register(role: String, name: String, phoneNumber: String,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;password: String, address: String): User&lt;br&gt;+ addUser(user: User): void&lt;br&gt;+ getUser(userId: String): User&lt;br&gt;+ getAllUsers(actor: User): List&amp;lt;User&amp;gt;&lt;br&gt;+ login(phoneNumber: String, password: String): User&lt;br&gt;- checkCanAuction(item: Item, seller: Seller): void&lt;br&gt;- adoptItem(item: Item, seller: Seller): void&lt;br&gt;- hasUnresolvedAuction(itemId: String): boolean&lt;br&gt;- findItem(itemId: String): Item&lt;br&gt;- requireEditableItem(actor: User, itemId: String): Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="AuctionManager">
+          <mxGeometry y="149" width="452" height="554" as="geometry" />
+        </mxCell>
+        <mxCell id="DataStore" value="&lt;b&gt;DataStore&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(persistence – Người 5)&lt;/font&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=46;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="2640" y="-963" width="411" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="DataStore-s0" value="+ save(users: List&amp;lt;User&amp;gt;, auctions: List&amp;lt;Auction&amp;gt;): void&lt;br&gt;+ load(): SystemState" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="DataStore">
+          <mxGeometry y="46" width="411" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="Biddable" value="«interface»&lt;br&gt;&lt;b&gt;Biddable&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=46;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="76" y="0" width="314" height="141" as="geometry" />
+        </mxCell>
+        <mxCell id="Biddable-s0" value="+ lockFunds(amount: BigDecimal): void&lt;br&gt;+ unlockFunds(): BigDecimal&lt;br&gt;+ confirmPayment(amount: BigDecimal): void&lt;br&gt;+ canAfford(): boolean&lt;br&gt;+ canAfford(amount: BigDecimal): boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Biddable">
+          <mxGeometry y="46" width="314" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="User" value="&lt;i&gt;&lt;b&gt;User&lt;/b&gt;&lt;/i&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="460" y="0" width="397" height="432" as="geometry" />
+        </mxCell>
+        <mxCell id="User-s0" value="- name: String&lt;br&gt;- phoneNumber: String&lt;br&gt;- password: String&lt;br&gt;- address: String&lt;br&gt;- isActive: boolean = true&lt;br&gt;- role: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="User">
+          <mxGeometry y="30" width="397" height="112" as="geometry" />
+        </mxCell>
+        <mxCell id="User-sep1" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="User">
+          <mxGeometry y="142" width="397" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="User-s1" value="+ User(name, phoneNumber, password, address, role)&lt;br&gt;+ User(id, name, phoneNumber, password, address, role)&lt;br&gt;+ getName(): String&lt;br&gt;+ getPhoneNumber(): String&lt;br&gt;+ getPassword(): String&lt;br&gt;+ getAddress(): String&lt;br&gt;+ getRole(): String&lt;br&gt;+ isActive(): boolean&lt;br&gt;+ setPassword(newPassword: String): void&lt;br&gt;+ setActive(active: boolean): void&lt;br&gt;+ setName(name: String): void&lt;br&gt;+ setAddress(address: String): void&lt;br&gt;- validatePhoneNumber(phone: String): void&lt;br&gt;- validatePassword(pass: String): void&lt;br&gt;- validateName(name: String): String&lt;br&gt;- validateRole(role: String): String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="User">
+          <mxGeometry y="150" width="397" height="282" as="geometry" />
+        </mxCell>
+        <mxCell id="Payable" value="«interface»&lt;br&gt;&lt;b&gt;Payable&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=46;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="927" y="0" width="273" height="124" as="geometry" />
+        </mxCell>
+        <mxCell id="Payable-s0" value="+ deposit(amount: BigDecimal): void&lt;br&gt;+ withdraw(amount: BigDecimal): void&lt;br&gt;+ getBalance(): BigDecimal&lt;br&gt;+ getAvailableBalance(): BigDecimal" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Payable">
+          <mxGeometry y="46" width="273" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="Bidder" value="&lt;b&gt;Bidder&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="0" y="562" width="404" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="Bidder-s0" value="- balance: BigDecimal&lt;br&gt;- lockedBalance: BigDecimal&lt;br&gt;- maxBidLimit: BigDecimal&lt;br&gt;- autoBidEnabled: boolean = false&lt;br&gt;- auctionFunds: Map&amp;lt;UUID, BigDecimal&amp;gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Bidder">
+          <mxGeometry y="30" width="404" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="Bidder-sep1" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="Bidder">
+          <mxGeometry y="125" width="404" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="Bidder-s1" value="+ Bidder(name, phoneNumber, password, address)&lt;br&gt;+ Bidder(id, name, phoneNumber, password, address)&lt;br&gt;+ deposit(amount: BigDecimal): void&lt;br&gt;+ withdraw(amount: BigDecimal): void&lt;br&gt;+ getBalance(): BigDecimal&lt;br&gt;+ getAvailableBalance(): BigDecimal&lt;br&gt;+ getLockedBalance(): BigDecimal&lt;br&gt;+ reserveForAuction(key: UUID, total: BigDecimal): void&lt;br&gt;+ releaseAuctionFunds(key: UUID): void&lt;br&gt;+ payAuctionFunds(key: UUID, amount: BigDecimal): void&lt;br&gt;+ lockFunds(amount: BigDecimal): void&lt;br&gt;+ unlockFunds(): BigDecimal&lt;br&gt;+ confirmPayment(amount: BigDecimal): void&lt;br&gt;+ restoreFunds(amount: BigDecimal): void&lt;br&gt;+ canAfford(): boolean&lt;br&gt;+ canAfford(amount: BigDecimal): boolean&lt;br&gt;+ enableAutoBid(maxLimit: BigDecimal): void&lt;br&gt;+ disableAutoBid(): void&lt;br&gt;+ getMaxBidLimit(): BigDecimal&lt;br&gt;+ isAutoBidEnabled(): boolean&lt;br&gt;- manualLockedBalance(): BigDecimal" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Bidder">
+          <mxGeometry y="133" width="404" height="367" as="geometry" />
+        </mxCell>
+        <mxCell id="Seller" value="&lt;b&gt;Seller&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="474" y="562" width="369" height="177" as="geometry" />
+        </mxCell>
+        <mxCell id="Seller-s0" value="- balance: BigDecimal" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Seller">
+          <mxGeometry y="30" width="369" height="27" as="geometry" />
+        </mxCell>
+        <mxCell id="Seller-sep1" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="Seller">
+          <mxGeometry y="57" width="369" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="Seller-s1" value="+ Seller(name, phoneNumber, password, address)&lt;br&gt;+ Seller(id, name, phoneNumber, password, address)&lt;br&gt;+ deposit(amount: BigDecimal): void&lt;br&gt;+ withdraw(amount: BigDecimal): void&lt;br&gt;+ getBalance(): BigDecimal&lt;br&gt;+ getAvailableBalance(): BigDecimal" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Seller">
+          <mxGeometry y="65" width="369" height="112" as="geometry" />
+        </mxCell>
+        <mxCell id="Admin" value="&lt;b&gt;Admin&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="913" y="562" width="363" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="Admin-s0" value="+ Admin(name, phoneNumber, password, address)&lt;br&gt;+ Admin(id, name, phoneNumber, password, address)&lt;br&gt;+ banUser(user: User): void&lt;br&gt;+ unBanUser(user: User): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Admin">
+          <mxGeometry y="30" width="363" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="Auction" value="&lt;b&gt;Auction&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1720" y="0" width="452" height="789" as="geometry" />
+        </mxCell>
+        <mxCell id="Auction-s0" value="- auctionId: String&lt;br&gt;- fundsKey: UUID&lt;br&gt;- item: Item&lt;br&gt;- seller: Seller&lt;br&gt;- currentPrice: BigDecimal&lt;br&gt;- minimumIncrement: BigDecimal&lt;br&gt;- startTime: LocalDateTime&lt;br&gt;- endTime: LocalDateTime&lt;br&gt;- status: AuctionStatus&lt;br&gt;- highestBid: Bid&lt;br&gt;- bidHistory: List&amp;lt;Bid&amp;gt;&lt;br&gt;- observers: List&amp;lt;AuctionObserver&amp;gt; {transient}&lt;br&gt;- bidLock: ReentrantLock" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Auction">
+          <mxGeometry y="30" width="452" height="231" as="geometry" />
+        </mxCell>
+        <mxCell id="Auction-sep1" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="Auction">
+          <mxGeometry y="261" width="452" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="Auction-s1" value="+ Auction(item: Item, seller: Seller,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;minimumIncrement: BigDecimal, startTime: LocalDateTime,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;endTime: LocalDateTime)&lt;br&gt;+ startAuction(): void&lt;br&gt;+ placeBid(bidder: Bidder, amount: BigDecimal): boolean&lt;br&gt;+ finishAuction(): void&lt;br&gt;+ payAuction(payer: Bidder): void&lt;br&gt;+ cancelAuction(actor: User): void&lt;br&gt;+ updateTime(): void&lt;br&gt;+ addObserver(observer: AuctionObserver): void&lt;br&gt;+ removeObserver(observer: AuctionObserver): void&lt;br&gt;+ getAuctionId(): String&lt;br&gt;+ getItem(): Item&lt;br&gt;+ getSeller(): Seller&lt;br&gt;+ getMinimumIncrement(): BigDecimal&lt;br&gt;+ getStartTime(): LocalDateTime&lt;br&gt;+ getEndTime(): LocalDateTime&lt;br&gt;+ getCurrentPrice(): BigDecimal&lt;br&gt;+ getStatus(): AuctionStatus&lt;br&gt;+ getHighestBid(): Bid&lt;br&gt;+ getBidHistory(): List&amp;lt;Bid&amp;gt;&lt;br&gt;- validateBidder(bidder: Bidder): void&lt;br&gt;- validateAuctionAcceptsBids(): void&lt;br&gt;- validateAmount(amount: BigDecimal): void&lt;br&gt;- moveReservedFunds(bidder: Bidder, amount: BigDecimal): void&lt;br&gt;- cancelAuction(): void&lt;br&gt;- notifyObservers(listeners: List&amp;lt;AuctionObserver&amp;gt;,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;notification: Consumer&amp;lt;AuctionObserver&amp;gt;): void&lt;br&gt;- writeObject(out: ObjectOutputStream): void&lt;br&gt;- readObject(in: ObjectInputStream): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Auction">
+          <mxGeometry y="269" width="452" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="AuctionObserver" value="«interface»&lt;br&gt;&lt;b&gt;AuctionObserver&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=46;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="2242" y="0" width="466" height="124" as="geometry" />
+        </mxCell>
+        <mxCell id="AuctionObserver-s0" value="+ onNewBid(auction: Auction, bid: Bid): void&lt;br&gt;+ onAuctionStatusChanged(auction: Auction,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;oldStatus: AuctionStatus, newStatus: AuctionStatus): void&lt;br&gt;+ onAuctionEnded(auction: Auction, winner: Bidder): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="AuctionObserver">
+          <mxGeometry y="46" width="466" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="Bid" value="&lt;b&gt;Bid&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1925" y="919" width="307" height="143" as="geometry" />
+        </mxCell>
+        <mxCell id="Bid-s0" value="- bidder: Bidder&lt;br&gt;- amount: BigDecimal" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Bid">
+          <mxGeometry y="30" width="307" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="Bid-sep1" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="Bid">
+          <mxGeometry y="74" width="307" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="Bid-s1" value="+ Bid(bidder: Bidder, amount: BigDecimal)&lt;br&gt;+ getBidder(): Bidder&lt;br&gt;+ getAmount(): BigDecimal" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Bid">
+          <mxGeometry y="82" width="307" height="61" as="geometry" />
+        </mxCell>
+        <mxCell id="AuctionStatus" value="«enumeration»&lt;br&gt;&lt;b&gt;AuctionStatus&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=46;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="2302" y="919" width="200" height="141" as="geometry" />
+        </mxCell>
+        <mxCell id="AuctionStatus-s0" value="OPEN&lt;br&gt;RUNNING&lt;br&gt;FINISHED&lt;br&gt;PAID&lt;br&gt;CANCELED" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="AuctionStatus">
+          <mxGeometry y="46" width="200" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="Item" value="&lt;i&gt;&lt;b&gt;Item&lt;/b&gt;&lt;/i&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="3518" y="0" width="432" height="483" as="geometry" />
+        </mxCell>
+        <mxCell id="Item-s0" value="- name: String&lt;br&gt;- startingPrice: BigDecimal&lt;br&gt;- status: ItemStatus&lt;br&gt;- description: String&lt;br&gt;- imageLink: String&lt;br&gt;- ownerId: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Item">
+          <mxGeometry y="30" width="432" height="112" as="geometry" />
+        </mxCell>
+        <mxCell id="Item-sep1" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="Item">
+          <mxGeometry y="142" width="432" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="Item-s1" value="+ Item(name: String, startingPrice: BigDecimal)&lt;br&gt;+ Item(id: String, name: String, startingPrice: BigDecimal)&lt;br&gt;&lt;i&gt;+ getCategory(): String&lt;/i&gt;&lt;br&gt;+ isValid(): boolean&lt;br&gt;+ updateDetails(name: String, startingPrice: BigDecimal,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;description: String): void&lt;br&gt;+ getName(): String&lt;br&gt;+ getStartingPrice(): BigDecimal&lt;br&gt;+ getStatus(): ItemStatus&lt;br&gt;+ setStatus(status: ItemStatus): void&lt;br&gt;+ getDescription(): String&lt;br&gt;+ setDescription(description: String): void&lt;br&gt;+ getImageLink(): String&lt;br&gt;+ setImageLink(imageLink: String): void&lt;br&gt;+ getOwnerId(): String&lt;br&gt;+ setOwnerId(ownerId: String): void&lt;br&gt;+ isOwnedBy(userId: String): boolean&lt;br&gt;&lt;u&gt;- validateName(name: String): void&lt;/u&gt;&lt;br&gt;&lt;u&gt;- validateStartingPrice(startingPrice: BigDecimal): void&lt;/u&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Item">
+          <mxGeometry y="150" width="432" height="333" as="geometry" />
+        </mxCell>
+        <mxCell id="ItemStatus" value="«enumeration»&lt;br&gt;&lt;b&gt;ItemStatus&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=46;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="4020" y="0" width="200" height="141" as="geometry" />
+        </mxCell>
+        <mxCell id="ItemStatus-s0" value="AVAILABLE&lt;br&gt;IN_AUCTION&lt;br&gt;SOLD&lt;br&gt;UNSOLD&lt;br&gt;CANCELED" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="ItemStatus">
+          <mxGeometry y="46" width="200" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="Art" value="&lt;b&gt;Art&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="3324" y="613" width="328" height="211" as="geometry" />
+        </mxCell>
+        <mxCell id="Art-s0" value="- artist: String&lt;br&gt;- yearPublished: int" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Art">
+          <mxGeometry y="30" width="328" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="Art-sep1" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="Art">
+          <mxGeometry y="74" width="328" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="Art-s1" value="+ Art(name, startingPrice)&lt;br&gt;+ Art(id, name, startingPrice)&lt;br&gt;+ getArtist(): String&lt;br&gt;+ setArtist(artist: String): void&lt;br&gt;+ getYearPublished(): int&lt;br&gt;+ setYearPublished(yearPublished: int): void&lt;br&gt;+ getCategory(): String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Art">
+          <mxGeometry y="82" width="328" height="129" as="geometry" />
+        </mxCell>
+        <mxCell id="Electronics" value="&lt;b&gt;Electronics&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="3722" y="613" width="287" height="211" as="geometry" />
+        </mxCell>
+        <mxCell id="Electronics-s0" value="- brand: String&lt;br&gt;- model: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Electronics">
+          <mxGeometry y="30" width="287" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="Electronics-sep1" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="Electronics">
+          <mxGeometry y="74" width="287" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="Electronics-s1" value="+ Electronics(name, startingPrice)&lt;br&gt;+ Electronics(id, name, startingPrice)&lt;br&gt;+ getBrand(): String&lt;br&gt;+ setBrand(brand: String): void&lt;br&gt;+ getModel(): String&lt;br&gt;+ setModel(model: String): void&lt;br&gt;+ getCategory(): String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Electronics">
+          <mxGeometry y="82" width="287" height="129" as="geometry" />
+        </mxCell>
+        <mxCell id="Vehicle" value="&lt;b&gt;Vehicle&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="4079" y="613" width="335" height="211" as="geometry" />
+        </mxCell>
+        <mxCell id="Vehicle-s0" value="- manufacturer: String&lt;br&gt;- yearMade: int" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Vehicle">
+          <mxGeometry y="30" width="335" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="Vehicle-sep1" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="Vehicle">
+          <mxGeometry y="74" width="335" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="Vehicle-s1" value="+ Vehicle(name, startingPrice)&lt;br&gt;+ Vehicle(id, name, startingPrice)&lt;br&gt;+ getManufacturer(): String&lt;br&gt;+ setManufacturer(manufacturer: String): void&lt;br&gt;+ getYearMade(): int&lt;br&gt;+ setYearMade(yearMade: int): void&lt;br&gt;+ getCategory(): String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="Vehicle">
+          <mxGeometry y="82" width="335" height="129" as="geometry" />
+        </mxCell>
+        <mxCell id="ArtFactory" value="&lt;b&gt;ArtFactory&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="3151" y="954" width="432" height="91" as="geometry" />
+        </mxCell>
+        <mxCell id="ArtFactory-s0" value="+ createItem(name: String, startingPrice: BigDecimal): Item&lt;br&gt;+ createItemById(id: String, name: String,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;startingPrice: BigDecimal): Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="ArtFactory">
+          <mxGeometry y="30" width="432" height="61" as="geometry" />
+        </mxCell>
+        <mxCell id="ElectronicsFactory" value="&lt;b&gt;ElectronicsFactory&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="3653" y="954" width="432" height="91" as="geometry" />
+        </mxCell>
+        <mxCell id="ElectronicsFactory-s0" value="+ createItem(name: String, startingPrice: BigDecimal): Item&lt;br&gt;+ createItemById(id: String, name: String,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;startingPrice: BigDecimal): Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="ElectronicsFactory">
+          <mxGeometry y="30" width="432" height="61" as="geometry" />
+        </mxCell>
+        <mxCell id="VehicleFactory" value="&lt;b&gt;VehicleFactory&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="4155" y="954" width="432" height="91" as="geometry" />
+        </mxCell>
+        <mxCell id="VehicleFactory-s0" value="+ createItem(name: String, startingPrice: BigDecimal): Item&lt;br&gt;+ createItemById(id: String, name: String,&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;startingPrice: BigDecimal): Item" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="VehicleFactory">
+          <mxGeometry y="30" width="432" height="61" as="geometry" />
+        </mxCell>
+        <mxCell id="ItemFactory" value="&lt;i&gt;&lt;b&gt;ItemFactory&lt;/b&gt;&lt;/i&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="3515" y="1175" width="438" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="ItemFactory-s0" value="&lt;i&gt;+ createItem(name: String, startingPrice: BigDecimal): Item&lt;/i&gt;&lt;br&gt;&lt;i&gt;+ createItemById(id: String, name: String,&lt;/i&gt;&lt;br&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;startingPrice: BigDecimal): Item&lt;br&gt;&lt;u&gt;+ getFactory(type: ItemType): ItemFactory&lt;/u&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="ItemFactory">
+          <mxGeometry y="30" width="438" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="ItemType" value="«enumeration»&lt;br&gt;&lt;b&gt;ItemType&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=46;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="4023" y="1175" width="200" height="107" as="geometry" />
+        </mxCell>
+        <mxCell id="ItemType-s0" value="VEHICLE&lt;br&gt;ART&lt;br&gt;ELECTRONICS" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="ItemType">
+          <mxGeometry y="46" width="200" height="61" as="geometry" />
+        </mxCell>
+        <mxCell id="IllegalArgumentException" value="&lt;b&gt;IllegalArgumentException&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(java.lang)&lt;/font&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=46;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1978" y="1232" width="200" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="IllegalStateException" value="&lt;b&gt;IllegalStateException&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(java.lang)&lt;/font&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=46;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="2248" y="1232" width="200" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="InvalidBidException" value="&lt;b&gt;InvalidBidException&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1496" y="1408" width="411" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="InvalidBidException-s0" value="+ InvalidBidException(message: String)&lt;br&gt;+ InvalidBidException(message: String, cause: Throwable)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="InvalidBidException">
+          <mxGeometry y="30" width="411" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="InsufficientFundsException" value="&lt;b&gt;InsufficientFundsException&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1977" y="1408" width="459" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="InsufficientFundsException-s0" value="+ InsufficientFundsException(message: String)&lt;br&gt;+ InsufficientFundsException(message: String, cause: Throwable)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="InsufficientFundsException">
+          <mxGeometry y="30" width="459" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="AuctionStateException" value="&lt;b&gt;AuctionStateException&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="2506" y="1408" width="425" height="74" as="geometry" />
+        </mxCell>
+        <mxCell id="AuctionStateException-s0" value="+ AuctionStateException(message: String)&lt;br&gt;+ AuctionStateException(message: String, cause: Throwable)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=nowrap;html=1;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="AuctionStateException">
+          <mxGeometry y="30" width="425" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="User" target="Entity">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="Bid" target="Entity">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="Item" target="Entity">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="Bidder" target="User">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="Seller" target="User">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="Admin" target="User">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="Art" target="Item">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="Electronics" target="Item">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="Vehicle" target="Item">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ArtFactory" target="ItemFactory">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ElectronicsFactory" target="ItemFactory">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="VehicleFactory" target="ItemFactory">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="InvalidBidException" target="IllegalArgumentException">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="InsufficientFundsException" target="IllegalArgumentException">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="AuctionStateException" target="IllegalStateException">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;dashed=1;" edge="1" parent="1" source="Entity" target="Serializable">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;dashed=1;" edge="1" parent="1" source="Auction" target="Serializable">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;dashed=1;exitY=0;exitDx=0;exitDy=0;entryY=1;entryDx=0;entryDy=0;exitX=0.2;entryX=0.5;" edge="1" parent="1" source="Bidder" target="Biddable">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;dashed=1;exitY=0;exitDx=0;exitDy=0;entryY=1;entryDx=0;entryDy=0;exitX=0.8;entryX=0.3;" edge="1" parent="1" source="Bidder" target="Payable">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" value="" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=block;endFill=0;endSize=14;dashed=1;exitY=0;exitDx=0;exitDy=0;entryY=1;entryDx=0;entryDy=0;exitX=0.8;entryX=0.7;" edge="1" parent="1" source="Seller" target="Payable">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e21" value="«create»" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="ArtFactory" target="Art">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e22" value="«create»" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="ElectronicsFactory" target="Electronics">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e23" value="«create»" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="VehicleFactory" target="Vehicle">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e24" value="«use»" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;dashed=1;" edge="1" parent="1" source="ItemFactory" target="ItemType">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e25" value="«use»" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;dashed=1;" edge="1" parent="1" source="AuctionManager" target="ItemFactory">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e26" value="«use»" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;dashed=1;" edge="1" parent="1" source="AuctionManager" target="DataStore">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e27" value="«throw»" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;dashed=1;" edge="1" parent="1" source="Auction" target="InvalidBidException">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e28" value="«throw»" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;dashed=1;" edge="1" parent="1" source="Auction" target="AuctionStateException">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e29" value="«throw»" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;dashed=1;" edge="1" parent="1" source="Bidder" target="InsufficientFundsException">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e30" value="«throw»" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;dashed=1;" edge="1" parent="1" source="Seller" target="InsufficientFundsException">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e31" value="auctions" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;startArrow=diamondThin;startFill=0;startSize=18;endArrow=open;endSize=12;" edge="1" parent="1" source="AuctionManager" target="Auction">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e31-s" value="1" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e31">
+          <mxGeometry x="-0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e31-t" value="0..*" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e31">
+          <mxGeometry x="0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e32" value="users" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;startArrow=diamondThin;startFill=0;startSize=18;endArrow=open;endSize=12;" edge="1" parent="1" source="AuctionManager" target="User">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e32-s" value="1" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e32">
+          <mxGeometry x="-0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e32-t" value="0..*" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e32">
+          <mxGeometry x="0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e33" value="items" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;startArrow=diamondThin;startFill=0;startSize=18;endArrow=open;endSize=12;" edge="1" parent="1" source="AuctionManager" target="Item">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e33-s" value="1" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e33">
+          <mxGeometry x="-0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e33-t" value="0..*" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e33">
+          <mxGeometry x="0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e34" value="bidHistory, highestBid" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;startArrow=diamondThin;startFill=1;startSize=18;endArrow=open;endSize=12;" edge="1" parent="1" source="Auction" target="Bid">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e34-s" value="1" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e34">
+          <mxGeometry x="-0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e34-t" value="0..*" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e34">
+          <mxGeometry x="0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e35" value="item" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;" edge="1" parent="1" source="Auction" target="Item">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e35-s" value="0..*" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e35">
+          <mxGeometry x="-0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e35-t" value="1" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e35">
+          <mxGeometry x="0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e36" value="seller" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;" edge="1" parent="1" source="Auction" target="Seller">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e36-s" value="0..*" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e36">
+          <mxGeometry x="-0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e36-t" value="1" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e36">
+          <mxGeometry x="0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e37" value="bidder" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;" edge="1" parent="1" source="Bid" target="Bidder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e37-s" value="0..*" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e37">
+          <mxGeometry x="-0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e37-t" value="1" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e37">
+          <mxGeometry x="0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e38" value="observers" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;" edge="1" parent="1" source="Auction" target="AuctionObserver">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e38-s" value="1" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e38">
+          <mxGeometry x="-0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e38-t" value="0..*" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e38">
+          <mxGeometry x="0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e39" value="status" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;" edge="1" parent="1" source="Auction" target="AuctionStatus">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e39-t" value="1" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e39">
+          <mxGeometry x="0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e40" value="status" style="html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;fontSize=11;endArrow=open;endSize=12;" edge="1" parent="1" source="Item" target="ItemStatus">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e40-t" value="1" style="edgeLabel;resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=11;" vertex="1" connectable="0" parent="e40">
+          <mxGeometry x="0.85" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="title" value="&lt;b style=&quot;font-size:20px&quot;&gt;Sơ đồ lớp – phần lõi (Server 1)&lt;/b&gt;&lt;br&gt;Cập nhật theo nhánh dev ngày 19/11/2026" style="text;html=1;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="0" y="-1103" width="700" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="&lt;b&gt;Chú thích&lt;/b&gt;&lt;br&gt;+ public &amp;nbsp; - private &amp;nbsp; # protected&lt;br&gt;&lt;u&gt;gạch chân&lt;/u&gt; = static &amp;nbsp; &lt;i&gt;nghiêng&lt;/i&gt; = abstract&lt;br&gt;Nét liền, tam giác rỗng = kế thừa (extends)&lt;br&gt;Nét đứt, tam giác rỗng = hiện thực (implements)&lt;br&gt;Nét đứt, mũi tên mở = phụ thuộc&lt;br&gt;Thoi rỗng = kết tập &amp;nbsp; Thoi đặc = hợp thành&lt;br&gt;Màu: xanh dương = user, xanh lá = item, cam = auction,&lt;br&gt;tím = service, đỏ = exception, xám = enum" style="shape=note;whiteSpace=wrap;html=1;size=14;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;fillColor=#ffffff;strokeColor=#999999;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="0" y="-1023" width="380" height="170" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="10">
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+    <Label fx:id="greeting"/>
+    <ListView fx:id="auctionList"/>
+    <TextField fx:id="amountField" promptText="Nhập số tiền đặt giá"/>
+    <Button fx:id="bidButton" text="Đặt giá" onAction="#bid"/>
+    <Button fx:id="payButton" text="Thanh toán phiên đã chọn" onAction="#pay"/>
+    <Button text="Cập nhật danh sách" onAction="#reload"/>
+    <Button fx:id="cancelButton" text="Hủy phiên đã chọn" onAction="#cancel"/>
+    <Button text="Đăng xuất" onAction="#logout"/>
+    <Label fx:id="message"/>
+</VBox>
